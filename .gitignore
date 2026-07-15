@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# dbt
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+.terraform.lock.hcl
+
+# Spark / Airflow
+spark-warehouse/
+metastore_db/
+airflow/logs/
+airflow/airflow.db
+airflow/webserver_config.py
+
+# Data and model artifacts
+data/
+artifacts/
+mlruns/
+mlartifacts/
+checkpoints/
+*.parquet
+*.avro
+*.orc
+*.delta
+*.joblib
+*.pkl
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build and package outputs
+build/
+dist/
+*.egg-info/
+*.zip
