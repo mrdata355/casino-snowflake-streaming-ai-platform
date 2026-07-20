@@ -9,7 +9,7 @@ on:
         type: choice
         options: [dev, qa, prod]
       dry_run:
-        description: Render SQL without executing it
+        description: Render SQL without connecting to Snowflake
         required: true
         default: true
         type: boolean
@@ -21,34 +21,75 @@ jobs:
   deploy:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: snowflake-${{ inputs.environment }}
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt -r requirements-cloud.txt
+          cache: pip
+      - name: Install deployment dependencies
+        run: pip install -r requirements-dev.txt -r requirements-cloud.txt
+
+      - name: Render deployment without credentials
+        if: ${{ inputs.dry_run }}
+        env:
+          DEPLOY_ENV: ${{ inputs.environment }}
+          PLATFORM_PREFIX: ${{ vars.PLATFORM_PREFIX }}
+          DATABASE_NAME: ${{ vars.SNOWFLAKE_DATABASE }}
+          MONTHLY_CREDIT_QUOTA: ${{ vars.MONTHLY_CREDIT_QUOTA }}
+          DATA_RETENTION_DAYS: ${{ vars.DATA_RETENTION_DAYS }}
+        run: python -m scripts.apply_snowflake --environment "$DEPLOY_ENV" --dry-run
+
       - name: Write Snowflake private key
         if: ${{ !inputs.dry_run }}
         shell: bash
         env:
           SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
         run: |
+          set -euo pipefail
+          test -n "$SNOWFLAKE_PRIVATE_KEY"
           umask 077
           printf '%s' "$SNOWFLAKE_PRIVATE_KEY" > /tmp/snowflake_rsa_key.p8
-      - name: Render or deploy account objects
+
+      - name: Validate Snowflake authentication settings
+        if: ${{ !inputs.dry_run }}
         env:
           DEPLOY_ENV: ${{ inputs.environment }}
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          PLATFORM_PREFIX: ${{ vars.PLATFORM_PREFIX }}
+          SNOWFLAKE_ACCOUNT_IDENTIFIER: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
           SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: OPS
           SNOWFLAKE_PRIVATE_KEY_PATH: /tmp/snowflake_rsa_key.p8
           SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
-        run: >-
-          python scripts/apply_snowflake.py
-          --environment "$DEPLOY_ENV"
-          ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: |
+          python -m scripts.apply_snowflake --environment "$DEPLOY_ENV" --dry-run
+          python -m scripts.validate_env
+
+      - name: Apply Snowflake account objects
+        if: ${{ !inputs.dry_run }}
+        env:
+          DEPLOY_ENV: ${{ inputs.environment }}
+          PLATFORM_PREFIX: ${{ vars.PLATFORM_PREFIX }}
+          SNOWFLAKE_ACCOUNT_IDENTIFIER: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: OPS
+          SNOWFLAKE_PRIVATE_KEY_PATH: /tmp/snowflake_rsa_key.p8
+          SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+          MONTHLY_CREDIT_QUOTA: ${{ vars.MONTHLY_CREDIT_QUOTA }}
+          DATA_RETENTION_DAYS: ${{ vars.DATA_RETENTION_DAYS }}
+        run: python -m scripts.apply_snowflake --environment "$DEPLOY_ENV"
+
       - name: Remove temporary key
         if: always()
         run: rm -f /tmp/snowflake_rsa_key.p8
