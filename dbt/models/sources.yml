@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+    schema: BRONZE
+    loader: spark-and-snowpipe
+    loaded_at_field: ingested_at
+    freshness:
+      warn_after: {count: 10, period: minute}
+      error_after: {count: 20, period: minute}
+    tables:
+      - name: slot_events_raw
+        description: Immutable slot telemetry with replay metadata.
+        columns:
+          - name: event_id
+            tests: [not_null, unique]
+          - name: event_time
+            tests: [not_null]
+          - name: machine_id
+            tests: [not_null]
