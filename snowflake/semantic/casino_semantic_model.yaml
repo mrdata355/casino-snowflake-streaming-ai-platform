@@ -1,0 +1,79 @@
+name: CASINO_OPERATIONS
+description: Governed semantic model for casino revenue, slot operations, labor, loyalty, and location profitability.
+tables:
+  - name: GAME_REVENUE
+    description: Certified daily gaming revenue at property, location, game type, and gaming day grain.
+    base_table:
+      database: ${DATABASE_NAME}
+      schema: GOLD
+      table: FACT_GAME_REVENUE_DAILY
+    primary_key:
+      columns: [GAMING_DAY, PROPERTY_ID, LOCATION_ID, GAME_TYPE]
+    dimensions:
+      - name: GAMING_DAY
+        expr: GAMING_DAY
+        data_type: DATE
+      - name: PROPERTY_ID
+        expr: PROPERTY_ID
+        data_type: TEXT
+        synonyms: [property, casino]
+      - name: LOCATION_ID
+        expr: LOCATION_ID
+        data_type: TEXT
+        synonyms: [floor zone, location]
+      - name: GAME_TYPE
+        expr: GAME_TYPE
+        data_type: TEXT
+    facts:
+      - name: GROSS_WIN
+        expr: GROSS_WIN
+        data_type: NUMBER
+      - name: ADJUSTMENTS
+        expr: ADJUSTMENTS
+        data_type: NUMBER
+      - name: NET_GAMING_REVENUE
+        expr: NET_GAMING_REVENUE
+        data_type: NUMBER
+    metrics:
+      - name: TOTAL_NET_GAMING_REVENUE
+        expr: SUM(NET_GAMING_REVENUE)
+        description: Sum of certified net gaming revenue after approved adjustments.
+  - name: LOCATION_PROFITABILITY
+    description: Certified daily profitability at property and location grain.
+    base_table:
+      database: ${DATABASE_NAME}
+      schema: SEMANTIC
+      table: LOCATION_PROFITABILITY_DAILY
+    primary_key:
+      columns: [BUSINESS_DATE, PROPERTY_ID, LOCATION_ID]
+    dimensions:
+      - name: BUSINESS_DATE
+        expr: BUSINESS_DATE
+        data_type: DATE
+      - name: PROPERTY_ID
+        expr: PROPERTY_ID
+        data_type: TEXT
+      - name: LOCATION_ID
+        expr: LOCATION_ID
+        data_type: TEXT
+    facts:
+      - name: ESTIMATED_LOCATION_PROFIT
+        expr: ESTIMATED_LOCATION_PROFIT
+        data_type: NUMBER
+    metrics:
+      - name: TOTAL_ESTIMATED_LOCATION_PROFIT
+        expr: SUM(ESTIMATED_LOCATION_PROFIT)
+verified_queries:
+  - name: top_locations_by_profit
+    question: Which five locations produced the most estimated profit last month?
+    sql: |
+      SELECT LOCATION_ID, SUM(ESTIMATED_LOCATION_PROFIT) AS PROFIT
+      FROM ${DATABASE_NAME}.SEMANTIC.LOCATION_PROFITABILITY_DAILY
+      WHERE BUSINESS_DATE >= DATE_TRUNC('month', DATEADD('month', -1, CURRENT_DATE()))
+        AND BUSINESS_DATE < DATE_TRUNC('month', CURRENT_DATE())
+      GROUP BY LOCATION_ID
+      ORDER BY PROFIT DESC
+      LIMIT 5
+custom_instructions: |
+  Revenue means certified net gaming revenue unless the user explicitly requests gross win.
+  Never expose player-level PII. Refuse requests outside the user's property access scope.
