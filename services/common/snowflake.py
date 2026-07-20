@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from typing import Any
 
@@ -10,7 +10,7 @@ class SnowflakeConfigurationError(RuntimeError):
     """Raised when required Snowflake connection settings are missing or unsafe."""
 
 
-def build_connection_parameters(query_tag: str) -> dict[str, Any]:
+def build_connection_parameters(query_tag: str = "casino-platform") -> dict[str, Any]:
     required = ("SNOWFLAKE_ACCOUNT_IDENTIFIER", "SNOWFLAKE_USER")
     missing = [name for name in required if not os.getenv(name)]
     if missing:
@@ -51,8 +51,8 @@ def build_connection_parameters(query_tag: str) -> dict[str, Any]:
 
 
 @contextmanager
-def connection(query_tag: str) -> Iterator[Any]:
-    # Imported lazily so credential-free local tests do not require the cloud package.
+def connection(query_tag: str = "casino-platform") -> Iterator[Any]:
+    """Open a Snowflake connection only when a cloud operation is executed."""
     import snowflake.connector  # type: ignore[import-not-found]
 
     conn = snowflake.connector.connect(**build_connection_parameters(query_tag))
@@ -60,3 +60,22 @@ def connection(query_tag: str) -> Iterator[Any]:
         yield conn
     finally:
         conn.close()
+
+
+def query_dataframe(
+    sql: str,
+    params: Sequence[Any] | None = None,
+    query_tag: str = "casino-query-dataframe",
+) -> Any:
+    """Execute a parameterized query and return a pandas DataFrame."""
+    import pandas as pd  # type: ignore[import-not-found]
+
+    with connection(query_tag) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, params)
+            rows = cursor.fetchall()
+            columns = [item[0].lower() for item in cursor.description]
+            return pd.DataFrame(rows, columns=columns)
+        finally:
+            cursor.close()
