@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: ruff check local_demo services scripts tests
+      - run: python -m compileall local_demo services scripts tests
+      - run: pytest -q --cov=local_demo --cov=services --cov=scripts --cov-report=term-missing --cov-fail-under=85
+      - name: Validate contracts and Snowflake templates
+        run: python scripts/validate_env.py --template-mode
+      - name: Validate Terraform formatting
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - run: terraform -chdir=terraform fmt -check -recursive
+      - run: terraform -chdir=terraform init -backend=false
+      - run: terraform -chdir=terraform validate

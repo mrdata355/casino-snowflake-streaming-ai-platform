@@ -1,0 +1,15 @@
+environment     = "DEV"
+platform_prefix = "CASINO"
+warehouse_sizes = {
+  ingest    = "XSMALL"
+  transform = "XSMALL"
+  feature   = "XSMALL"
+  cortex    = "XSMALL"
+}
+monthly_credit_quotas = {
+  ingest    = 20
+  transform = 30
+  feature   = 20
+  cortex    = 10
+}
+# Real organization, account, user and private key values are injected as TF_VAR_* secrets.

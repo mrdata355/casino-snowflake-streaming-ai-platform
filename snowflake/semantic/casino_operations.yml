@@ -1,0 +1,43 @@
+name: casino_operations
+ description: Governed conversational model for synthetic casino operations and profitability.
+tables:
+  - name: slot_performance
+    base_table:
+      database: CASINO_PROD
+      schema: GOLD
+      table: FACT_SLOT_PERFORMANCE_5MIN
+    dimensions:
+      - name: property_id
+        expr: property_id
+        data_type: VARCHAR
+        synonyms: [casino, resort, property]
+      - name: machine_id
+        expr: machine_id
+        data_type: VARCHAR
+      - name: window_start
+        expr: window_start
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: coin_in
+        expr: coin_in
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: net_gaming_revenue
+        expr: net_gaming_revenue
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: slot_utilization_rate
+        expr: utilization_rate
+        data_type: NUMBER
+        default_aggregation: avg
+        description: Play events divided by available event windows.
+verified_queries:
+  - name: highest_revenue_properties_last_24_hours
+    question: Which properties generated the most net gaming revenue in the last 24 hours?
+    sql: |
+      SELECT property_id, SUM(net_gaming_revenue) AS net_gaming_revenue
+      FROM CASINO_PROD.GOLD.FACT_SLOT_PERFORMANCE_5MIN
+      WHERE window_start >= DATEADD('hour', -24, CURRENT_TIMESTAMP())
+      GROUP BY property_id
+      ORDER BY net_gaming_revenue DESC
+      LIMIT 10
