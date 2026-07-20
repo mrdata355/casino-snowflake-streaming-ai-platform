@@ -1,0 +1,33 @@
+name: casino_lakehouse
+version: 1.0.0
+config-version: 2
+profile: casino_lakehouse
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  casino_lakehouse:
+    +persist_docs:
+      relation: true
+      columns: true
+    staging:
+      +materialized: view
+      +schema: STAGING
+    silver:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +on_schema_change: fail
+      +schema: SILVER
+    gold:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +on_schema_change: fail
+      +schema: GOLD
+    features:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +on_schema_change: fail
+      +schema: FEATURES

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "casino.model_score.v1",
+  "type": "object",
+  "required": ["entity_type", "entity_id", "model_name", "model_version", "scored_at", "score"],
+  "properties": {
+    "entity_type": {"enum": ["PLAYER", "MACHINE", "LOCATION", "OFFER"]},
+    "entity_id": {"type": "string"},
+    "model_name": {"type": "string"},
+    "model_version": {"type": "string"},
+    "feature_as_of": {"type": "string", "format": "date-time"},
+    "scored_at": {"type": "string", "format": "date-time"},
+    "score": {"type": "number"},
+    "prediction": {},
+    "request_id": {"type": "string"},
+    "trace_id": {"type": "string"}
+  },
+  "additionalProperties": true
+}

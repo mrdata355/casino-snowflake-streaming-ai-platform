@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install credential-free developer dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Capture Ruff diagnostics
+        id: ruff
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ruff check local_demo services scripts tests --output-format=concise 2>&1 | tee ruff-output.txt
+      - name: Upload Ruff diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-diagnostics
+          path: ruff-output.txt
+          if-no-files-found: error
+      - name: Enforce Ruff gate
+        if: steps.ruff.outcome == 'failure'
+        run: exit 1
+      - name: Compile credential-free Python
+        run: python -m compileall -q local_demo services scripts tests
+      - name: Capture Snowflake template validation
+        id: templates
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m scripts.validate_env --template-mode 2>&1 | tee template-validation.txt
+      - name: Upload template diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-validation-diagnostics
+          path: template-validation.txt
+          if-no-files-found: error
+      - name: Enforce template gate
+        if: steps.templates.outcome == 'failure'
+        run: exit 1
+      - name: Capture deterministic tests and core coverage
+        id: tests
+        continue-on-error: true
+        env:
+          APP_ENV: test
+        shell: bash
+        run: |
+          set -o pipefail
+          pytest -q --cov=local_demo --cov-report=term-missing --cov-report=xml --cov-fail-under=90 2>&1 | tee pytest-output.txt
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-diagnostics
+          path: |
+            pytest-output.txt
+            coverage.xml
+          if-no-files-found: warn
+      - name: Enforce test gate
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Capture Terraform validation
+        id: terraform
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            terraform -chdir=terraform fmt -check -recursive
+            terraform -chdir=terraform init -backend=false
+            terraform -chdir=terraform validate
+          } 2>&1 | tee terraform-validation.txt
+      - name: Upload Terraform diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-validation-diagnostics
+          path: terraform-validation.txt
+          if-no-files-found: error
+      - name: Enforce Terraform gate
+        if: steps.terraform.outcome == 'failure'
+        run: exit 1

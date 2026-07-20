@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: silver_slot_events
+    description: Replay-safe, validated slot events at one row per event_id.
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: event_id
+        data_type: varchar
+        constraints: [{type: not_null}]
+        tests: [unique, not_null]
+      - name: machine_id
+        data_type: varchar
+        constraints: [{type: not_null}]
+      - name: property_id
+        data_type: varchar
+        constraints: [{type: not_null}]
+      - name: event_time
+        data_type: timestamp_ntz
+        constraints: [{type: not_null}]
+      - name: event_type
+        data_type: varchar
+      - name: coin_in
+        data_type: number(18,2)
+      - name: payout
+        data_type: number(18,2)
+      - name: jackpot_amount
+        data_type: number(18,2)
+      - name: net_gaming_revenue
+        data_type: number(18,2)
+      - name: payload
+        data_type: variant
+      - name: ingested_at
+        data_type: timestamp_ntz
+
+  - name: fact_slot_performance_5min
+    description: Certified slot performance at machine and five-minute window grain.
+    columns:
+      - name: machine_id
+        tests: [not_null]
+      - name: window_start
+        tests: [not_null]
+      - name: utilization_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1

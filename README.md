@@ -5,7 +5,7 @@
 
 A production-style reference implementation for a senior Snowflake data engineer supporting a casino and resort data platform. The platform ingests transactional and high-frequency event data, builds governed lakehouse products, publishes point-in-time ML features, serves model scores, and enables role-aware conversational analytics.
 
-> **Portfolio disclosure:** This repository uses synthetic data and fictional system identifiers. It is not an implementation commissioned by, deployed for, or affiliated with Hard Rock or any casino operator.
+> **Portfolio disclosure:** This repository uses synthetic data and fictional system identifiers. It is not a production system, was not commissioned or deployed by Hard Rock or another casino operator, and is not affiliated with those organizations.
 
 ## What this proves
 

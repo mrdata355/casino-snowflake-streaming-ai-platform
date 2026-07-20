@@ -1,12 +1,37 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "casino-snowflake-streaming-ai-platform"
+version = "0.1.0"
+description = "Production-style Snowflake lakehouse, streaming, semantic, and AI/ML reference platform."
+requires-python = ">=3.11,<3.14"
+
 [tool.ruff]
-line-length = 100
+line-length = 110
 target-version = "py311"
-exclude = [".venv", "dbt/target", "dbt/dbt_packages"]
+exclude = [".venv", "dbt/target", "dbt/dbt_packages", "build"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4"]
+ignore = ["B008"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["tests", "spark/tests"]
-addopts = "--strict-markers --disable-warnings"
+testpaths = ["tests"]
+addopts = "--strict-markers --disable-warnings -ra"
+markers = [
+  "cloud: requires real cloud credentials",
+  "spark: requires Java and PySpark",
+  "integration: integration-level test",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["local_demo"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90

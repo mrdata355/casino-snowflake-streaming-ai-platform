@@ -1,0 +1,17 @@
+domains:
+  gaming_revenue:
+    business_owner: Finance/Gaming Analytics
+    technical_owner: Data Platform
+    sla: daily by 07:00 ET
+  slot_operations:
+    business_owner: Casino Operations
+    technical_owner: Streaming Platform
+    sla: 60 seconds
+  player_value:
+    business_owner: Loyalty Analytics
+    technical_owner: Data Science Enablement
+    sla: 15 minutes
+  labor_efficiency:
+    business_owner: Workforce Planning
+    technical_owner: Data Platform
+    sla: daily by 08:00 ET

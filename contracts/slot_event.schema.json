@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "casino.slot_event.v1",
+  "type": "object",
+  "required": ["event_id", "event_time", "property_id", "machine_id", "event_type"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "event_time": {"type": "string", "format": "date-time"},
+    "ingestion_time": {"type": "string", "format": "date-time"},
+    "property_id": {"type": "string"},
+    "location_id": {"type": "string"},
+    "machine_id": {"type": "string"},
+    "event_type": {"enum": ["SPIN", "COIN_IN", "COIN_OUT", "JACKPOT", "FAULT", "HEARTBEAT"]},
+    "amount": {"type": ["number", "null"]},
+    "currency": {"type": "string", "default": "USD"},
+    "schema_version": {"type": "integer", "minimum": 1}
+  },
+  "additionalProperties": true
+}
