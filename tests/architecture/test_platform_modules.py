@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REQUIRED_PLATFORM_FILES = [
     "docker-compose.yml",
     "spark/jobs/slot_stream.py",
