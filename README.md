@@ -7,6 +7,8 @@ A production-style reference implementation for a senior Snowflake data engineer
 
 > **Portfolio disclosure:** This repository uses synthetic data and fictional system identifiers. It is not a production system, was not commissioned or deployed by Hard Rock or another casino operator, and is not affiliated with those organizations.
 
+> **Begin here:** Follow the complete [S.T.A.R.T. walkthrough](docs/START_HERE.md) before adding any credentials.
+
 ## What this proves
 
 - Snowflake architecture beyond basic SQL: Snowpipe, Snowpipe Streaming, Streams, Tasks, Dynamic Tables, VARIANT, Time Travel, cloning, RBAC, masking, row access, resource monitors, and query-cost controls.
@@ -122,6 +124,7 @@ make test
 
 ## Documentation
 
+- [S.T.A.R.T. walkthrough](docs/START_HERE.md)
 - [Architecture](docs/architecture.md)
 - [Source-to-target mapping](docs/source_to_target.md)
 - [Production runbook](docs/runbook.md)
