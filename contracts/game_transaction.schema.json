@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "casino.game_transaction.v1",
+  "type": "object",
+  "required": ["transaction_id", "gaming_day", "property_id", "location_id", "game_type", "gross_win"],
+  "properties": {
+    "transaction_id": {"type": "string"},
+    "player_id": {"type": ["string", "null"]},
+    "gaming_day": {"type": "string", "format": "date"},
+    "property_id": {"type": "string"},
+    "location_id": {"type": "string"},
+    "game_type": {"type": "string"},
+    "gross_win": {"type": "number"},
+    "adjustments": {"type": "number", "default": 0},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}
