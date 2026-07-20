@@ -1,5 +1,5 @@
 name: casino_operations
- description: Governed conversational model for synthetic casino operations and profitability.
+description: Governed conversational model for synthetic casino operations and profitability.
 tables:
   - name: slot_performance
     base_table:
