@@ -26,6 +26,5 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -r requirements-dev.txt pip-audit
-      - run: pip-audit --local
+      - run: python -m pip install --upgrade pip pip-audit
+      - run: pip-audit -r requirements-dev.txt
