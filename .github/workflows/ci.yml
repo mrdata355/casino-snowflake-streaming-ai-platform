@@ -45,7 +45,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python scripts/validate_env.py --template-mode 2>&1 | tee template-validation.txt
+          python -m scripts.validate_env --template-mode 2>&1 | tee template-validation.txt
       - name: Upload template diagnostics
         if: always()
         uses: actions/upload-artifact@v4
