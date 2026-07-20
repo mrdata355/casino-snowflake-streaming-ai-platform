@@ -39,8 +39,23 @@ jobs:
         run: exit 1
       - name: Compile credential-free Python
         run: python -m compileall -q local_demo services scripts tests
-      - name: Validate contracts and Snowflake templates without credentials
-        run: python scripts/validate_env.py --template-mode
+      - name: Capture Snowflake template validation
+        id: templates
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/validate_env.py --template-mode 2>&1 | tee template-validation.txt
+      - name: Upload template diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-validation-diagnostics
+          path: template-validation.txt
+          if-no-files-found: error
+      - name: Enforce template gate
+        if: steps.templates.outcome == 'failure'
+        run: exit 1
       - name: Run deterministic tests and enforce core coverage
         env:
           APP_ENV: test
