@@ -14,7 +14,7 @@ permissions:
 jobs:
   dependency-and-secret-scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,4 +27,20 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install --upgrade pip pip-audit
-      - run: pip-audit -r requirements-dev.txt
+      - name: Capture dependency audit diagnostics
+        id: audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          pip-audit -r requirements-dev.txt 2>&1 | tee pip-audit-output.txt
+      - name: Upload dependency audit diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-diagnostics
+          path: pip-audit-output.txt
+          if-no-files-found: error
+      - name: Enforce dependency audit gate
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
