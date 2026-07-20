@@ -56,10 +56,27 @@ jobs:
       - name: Enforce template gate
         if: steps.templates.outcome == 'failure'
         run: exit 1
-      - name: Run deterministic tests and enforce core coverage
+      - name: Capture deterministic tests and core coverage
+        id: tests
+        continue-on-error: true
         env:
           APP_ENV: test
-        run: pytest -q --cov=local_demo --cov-report=term-missing --cov-report=xml --cov-fail-under=90
+        shell: bash
+        run: |
+          set -o pipefail
+          pytest -q --cov=local_demo --cov-report=term-missing --cov-report=xml --cov-fail-under=90 2>&1 | tee pytest-output.txt
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-diagnostics
+          path: |
+            pytest-output.txt
+            coverage.xml
+          if-no-files-found: warn
+      - name: Enforce test gate
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
