@@ -13,6 +13,7 @@ All data, identities, and infrastructure names in this repository are synthetic.
 - Streaming processing: Kafka and Pub/Sub ingestion, Spark Structured Streaming, event-time windows, watermarks, deduplication, checkpoint recovery, dead-letter handling, replay, and idempotent sinks.
 - DataOps: Airflow, dbt, Terraform, GitHub Actions, data contracts, automated testing, observability, runbooks, backfills, incident response, and controlled promotion.
 - AI and ML enablement: point-in-time feature products, leakage prevention, MLflow, governed scoring outputs, drift checks, feature APIs, and Cortex semantic consumption.
+- Scale validation: staged 10 GB, 100 GB, and 1 TB Snowflake benchmarks with query tagging, transient data, automatic cleanup, measured evidence, and a clearly labeled 10 TB projection.
 - Casino analytics: gaming revenue, slot utilization, player value, offer attribution, labor efficiency, and location profitability.
 
 ## Architecture
@@ -71,6 +72,7 @@ ml/             Training, scoring and drift-monitoring examples
 services/       Governed feature/score API and Cortex client
 terraform/      Repeatable Snowflake environment provisioning
 contracts/      JSON Schema contracts and ownership metadata
+benchmarks/     Credential-free scale planning, SQL rendering and controlled execution
 observability/  Data-quality, health, freshness and cost-monitoring SQL
 docs/           Architecture decisions, mappings, operations and setup documentation
 tests/          Contract, unit, integration, reconciliation and business-formula tests
@@ -99,6 +101,18 @@ make test
 
 See [Getting started](docs/getting_started.md) for local execution, Snowflake configuration, and deployment procedures.
 
+## Scale validation
+
+Plan and render the first benchmark without cloud credentials:
+
+```bash
+make benchmark-plan TARGET_GB=10 BENCHMARK_RUN_ID=SCALE_10GB_TRIAL
+make benchmark-render TARGET_GB=10 BENCHMARK_RUN_ID=SCALE_10GB_TRIAL
+make benchmark-test
+```
+
+Cloud execution is intentionally separate and requires an explicit confirmation flag. Follow the complete [scale benchmark protocol](docs/benchmarks/README.md) before creating any large Snowflake tables. Generated data and local benchmark reports remain outside Git.
+
 ## Engineering invariants
 
 - Writes are idempotent, transactional, or protected by deterministic keys.
@@ -126,6 +140,8 @@ See [Getting started](docs/getting_started.md) for local execution, Snowflake co
 
 - [Getting started](docs/getting_started.md)
 - [Platform components](docs/platform_components.md)
+- [Scale benchmark protocol](docs/benchmarks/README.md)
+- [Scale benchmark report template](docs/benchmarks/report_template.md)
 - [Architecture](docs/architecture.md)
 - [Source-to-target mapping](docs/source_to_target.md)
 - [Production runbook](docs/runbook.md)

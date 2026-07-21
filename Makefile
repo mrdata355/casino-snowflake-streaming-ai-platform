@@ -3,9 +3,12 @@ PYTHON ?= python3
 VENV ?= .venv
 VENV_PYTHON := $(VENV)/bin/python
 VENV_PIP := $(VENV)/bin/pip
+TARGET_GB ?= 10
+BENCHMARK_RUN_ID ?= SCALE_$(TARGET_GB)GB_PLAN
 
 .PHONY: help bootstrap install-dev install-cloud validate lint test local-demo local-up local-down \
-        create-topics contracts dbt-compile dbt-build terraform-check cloud-smoke package clean
+        create-topics contracts dbt-compile dbt-build terraform-check cloud-smoke benchmark-plan \
+        benchmark-render benchmark-test package clean
 
 help:
 	@echo "bootstrap        Create a virtual environment and install developer dependencies"
@@ -17,6 +20,9 @@ help:
 	@echo "dbt-compile      Compile dbt models after Snowflake credentials are configured"
 	@echo "terraform-check  Format and validate Terraform when Terraform is installed"
 	@echo "cloud-smoke      Validate local Snowflake credentials and run a smoke query"
+	@echo "benchmark-plan   Print a credential-free scale plan; set TARGET_GB and BENCHMARK_RUN_ID"
+	@echo "benchmark-render Render reviewable Snowflake benchmark SQL under build/benchmarks"
+	@echo "benchmark-test   Run the credential-free scale benchmark unit tests"
 
 bootstrap:
 	$(PYTHON) -m venv $(VENV)
@@ -35,7 +41,7 @@ validate: lint contracts test
 lint:
 	$(VENV_PYTHON) -m ruff format --check .
 	$(VENV_PYTHON) -m ruff check .
-	$(VENV_PYTHON) -m compileall -q local_demo ingestion spark services ml scripts airflow lakehouse tests
+	$(VENV_PYTHON) -m compileall -q benchmarks local_demo ingestion spark services ml scripts airflow lakehouse tests
 
 contracts:
 	APP_ENV=test $(VENV_PYTHON) -m pytest -q tests/contract tests/architecture
@@ -70,6 +76,22 @@ terraform-check:
 cloud-smoke:
 	$(VENV_PYTHON) -m scripts.validate_env
 	bash scripts/smoke_test.sh
+
+benchmark-plan:
+	$(VENV_PYTHON) -m scripts.run_scale_benchmark plan \
+		--target-gb $(TARGET_GB) \
+		--run-id $(BENCHMARK_RUN_ID)
+
+benchmark-render:
+	mkdir -p build/benchmarks
+	$(VENV_PYTHON) -m scripts.run_scale_benchmark render \
+		--target-gb $(TARGET_GB) \
+		--run-id $(BENCHMARK_RUN_ID) \
+		--database $${SNOWFLAKE_DATABASE:-CASINO_DEV} \
+		--out build/benchmarks/$(BENCHMARK_RUN_ID).sql
+
+benchmark-test:
+	APP_ENV=test $(VENV_PYTHON) -m pytest -q tests/unit/test_scale_benchmark.py
 
 package:
 	zip -r casino-snowflake-streaming-ai-platform.zip . \
