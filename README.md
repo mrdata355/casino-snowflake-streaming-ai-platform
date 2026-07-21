@@ -5,7 +5,7 @@
 
 An end-to-end data and AI platform for casino and resort analytics. The platform ingests transactional and high-frequency event data, builds governed Snowflake lakehouse products, publishes point-in-time ML features, serves versioned model scores, and supports role-aware conversational analytics.
 
-All data, identities, and infrastructure names in this repository are synthetic. This is an independent engineering project and is not affiliated with or deployed by a casino operator.
+All data, identities, and infrastructure names in this repository are synthetic. It is not a production system and is not affiliated with or deployed by a casino operator.
 
 ## Platform capabilities
 
