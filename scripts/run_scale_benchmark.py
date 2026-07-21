@@ -29,6 +29,26 @@ def render_sql(statements: list[tuple[str, str]]) -> str:
     return "\n\n".join(blocks) + "\n"
 
 
+def execute_statement(conn: Any, name: str, sql: str) -> dict[str, Any]:
+    cursor = conn.cursor()
+    step_start = time.perf_counter()
+    try:
+        cursor.execute(sql)
+        rows = cursor.fetchall() if cursor.description else []
+        columns = [item[0].lower() for item in cursor.description or []]
+        return {
+            "name": name,
+            "status": "succeeded",
+            "query_id": getattr(cursor, "sfqid", None),
+            "elapsed_seconds": time.perf_counter() - step_start,
+            "rowcount": cursor.rowcount,
+            "columns": columns,
+            "rows": [dict(zip(columns, row, strict=True)) for row in rows[:20]],
+        }
+    finally:
+        cursor.close()
+
+
 def execute_benchmark(
     statements: list[tuple[str, str]],
     *,
@@ -37,30 +57,46 @@ def execute_benchmark(
 ) -> dict[str, Any]:
     from services.common.snowflake import connection
 
+    primary = [(name, sql) for name, sql in statements if not name.startswith("drop_")]
+    cleanup = [(name, sql) for name, sql in statements if name.startswith("drop_")]
     statement_results: list[dict[str, Any]] = []
+    execution_error: str | None = None
+    cleanup_errors: list[str] = []
     started_at = datetime.now(UTC)
     wall_start = time.perf_counter()
+
     with connection(query_tag) as conn:
-        for name, sql in statements:
-            cursor = conn.cursor()
-            step_start = time.perf_counter()
-            try:
-                cursor.execute(sql)
-                rows = cursor.fetchall() if cursor.description else []
-                columns = [item[0].lower() for item in cursor.description or []]
-                statement_results.append(
-                    {
-                        "name": name,
-                        "query_id": getattr(cursor, "sfqid", None),
-                        "elapsed_seconds": time.perf_counter() - step_start,
-                        "rowcount": cursor.rowcount,
-                        "columns": columns,
-                        "rows": [dict(zip(columns, row, strict=True)) for row in rows[:20]],
-                    }
-                )
-            finally:
-                cursor.close()
-        conn.commit()
+        try:
+            for name, sql in primary:
+                try:
+                    statement_results.append(execute_statement(conn, name, sql))
+                except Exception as exc:  # Snowflake exceptions vary by connector version.
+                    execution_error = f"{type(exc).__name__}: {exc}"
+                    statement_results.append(
+                        {
+                            "name": name,
+                            "status": "failed",
+                            "elapsed_seconds": None,
+                            "error": execution_error,
+                        }
+                    )
+                    break
+        finally:
+            for name, sql in cleanup:
+                try:
+                    statement_results.append(execute_statement(conn, name, sql))
+                except Exception as exc:  # Cleanup must continue after an individual failure.
+                    message = f"{name}: {type(exc).__name__}: {exc}"
+                    cleanup_errors.append(message)
+                    statement_results.append(
+                        {
+                            "name": name,
+                            "status": "failed",
+                            "elapsed_seconds": None,
+                            "error": message,
+                        }
+                    )
+            conn.commit()
 
     elapsed_seconds = time.perf_counter() - wall_start
     finished_at = datetime.now(UTC)
@@ -68,11 +104,14 @@ def execute_benchmark(
     if credits_per_hour is not None:
         estimated_credits = credits_per_hour * elapsed_seconds / 3_600
     return {
+        "success": execution_error is None and not cleanup_errors,
         "started_at": started_at.isoformat(),
         "finished_at": finished_at.isoformat(),
         "elapsed_seconds": elapsed_seconds,
         "credits_per_hour": credits_per_hour,
         "estimated_credits": estimated_credits,
+        "execution_error": execution_error,
+        "cleanup_errors": cleanup_errors,
         "statements": statement_results,
     }
 
@@ -136,6 +175,8 @@ def main() -> None:
 
     if not args.confirm_scale_run:
         parser.error("execute requires --confirm-scale-run")
+    if args.credits_per_hour is not None and args.credits_per_hour < 0:
+        parser.error("credits-per-hour cannot be negative")
     if args.target_gb not in VALID_TARGETS_GB:
         supported = ", ".join(map(str, VALID_TARGETS_GB))
         parser.error(f"execute target must be one of: {supported} GB")
@@ -146,16 +187,18 @@ def main() -> None:
         query_tag=query_tag,
         credits_per_hour=args.credits_per_hour,
     )
-    projection = project_scale(
-        measured_tb=plan.logical_payload_tb,
-        elapsed_seconds=result["elapsed_seconds"],
-        target_tb=args.project_to_tb,
-        credits=result["estimated_credits"],
-    )
+    projection = None
+    if result["success"]:
+        projection = project_scale(
+            measured_tb=plan.logical_payload_tb,
+            elapsed_seconds=result["elapsed_seconds"],
+            target_tb=args.project_to_tb,
+            credits=result["estimated_credits"],
+        )
     report = {
         "plan": plan.to_dict(),
         "execution": result,
-        "projection": projection.to_dict(),
+        "projection": None if projection is None else projection.to_dict(),
         "warnings": [
             "Logical payload size is not the same as compressed Snowflake storage.",
             "Credit estimates are valid only when the benchmark warehouse is isolated.",
@@ -164,6 +207,8 @@ def main() -> None:
     }
     write_json(args.out, report)
     print(f"wrote benchmark report to {args.out}")
+    if not result["success"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
