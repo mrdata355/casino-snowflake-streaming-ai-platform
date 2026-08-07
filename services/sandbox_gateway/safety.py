@@ -87,15 +87,22 @@ def validate_sql(script: str, *, admin_lab: bool) -> list[str]:
     if not statements:
         raise SandboxPolicyError("No executable SQL statement was supplied.")
     if len(statements) > 20:
-        raise SandboxPolicyError("A sandbox execution is limited to 20 SQL statements.")
+        raise SandboxPolicyError(
+            "A sandbox execution is limited to 20 SQL statements."
+        )
     for statement in statements:
         if len(statement) > 50_000:
-            raise SandboxPolicyError("A single SQL statement exceeds the sandbox size limit.")
+            raise SandboxPolicyError(
+                "A single SQL statement exceeds the sandbox size limit."
+            )
         if _matches(FORBIDDEN_SQL, statement):
-            raise SandboxPolicyError("The statement contains an operation forbidden in OpsReady sandboxes.")
+            raise SandboxPolicyError(
+                "The statement contains an operation forbidden in OpsReady sandboxes."
+            )
         if not admin_lab and _matches(ADMIN_SQL, statement):
             raise SandboxPolicyError(
-                "This is an account/admin-level operation. Create an admin-lab session in a dedicated training account to run it."
+                "This is an account/admin-level operation. Create an admin-lab "
+                "session in a dedicated training account to run it."
             )
     return statements
 
@@ -104,6 +111,9 @@ def validate_python(code: str) -> None:
     lowered = code.lower()
     for token in FORBIDDEN_PYTHON:
         if token.lower() in lowered:
-            raise SandboxPolicyError(f"Python token '{token}' is blocked in the bounded Databricks execution profile.")
+            raise SandboxPolicyError(
+                f"Python token '{token}' is blocked in the bounded Databricks "
+                "execution profile."
+            )
     if len(code) > 50_000:
         raise SandboxPolicyError("Python command exceeds the sandbox size limit.")
