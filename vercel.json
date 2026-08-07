@@ -22,6 +22,9 @@
     {"src": "simulators/v6-full-job-cycle-lab.html", "use": "@vercel/static"},
     {"src": "simulators/v6-full-job-cycle-lab.css", "use": "@vercel/static"},
     {"src": "simulators/v6-full-job-cycle-lab.js", "use": "@vercel/static"},
+    {"src": "simulators/v6-engine-v2.js", "use": "@vercel/static"},
+    {"src": "simulators/v6-live-sandbox.js", "use": "@vercel/static"},
+    {"src": "simulators/v6-live-sandbox.css", "use": "@vercel/static"},
     {"src": "simulators/neon-harbor-production.html", "use": "@vercel/static"},
     {"src": "simulators/broken-pipeline-30.html", "use": "@vercel/static"},
     {"src": "simulators/daily-operations.html", "use": "@vercel/static"}
