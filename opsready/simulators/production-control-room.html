@@ -1,0 +1,38 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpsReady Production Control Room</title><link rel="stylesheet" href="/simulators/production-control-room.css"></head><body><header><div><h1>OpsReady — Production Control Room</h1><div class="muted">Fictional casino/hotel/loyalty DataOps environment. Actions change score, cost and recoverability.</div></div><span class="pill" id="sev">SEV1</span></header><nav id="nav"><button data-tab="control" class="active">Control Room</button><button data-tab="kafka">Kafka</button><button data-tab="dbx">Databricks</button><button data-tab="snow">Snowflake</button><button data-tab="join">Join Lab</button><button data-tab="recon">Reconciliation</button><button data-tab="cicd">CI/CD</button><button data-tab="repair">Repair Bay</button><button data-tab="handoff">Handoff</button></nav><main>
+<section id="control" class="tab active"><div class="metrics"><div class="card metric"><span class="muted">Clock</span><b id="clock">19:05</b></div><div class="card metric"><span class="muted">Kafka lag</span><b id="lag">1.90M</b></div><div class="card metric"><span class="muted">Compute</span><b id="cost">$412/hr</b></div><div class="card metric"><span class="muted">Impact</span><b id="impact">AT RISK</b></div><div class="card metric"><span class="muted">Score</span><b id="score">0/120</b></div></div><div class="grid"><div class="card"><h2>Live Pipeline</h2><div id="pipeline" class="pipeline"></div><div class="actions"><button id="contain" class="primary">Contain Publication</button><button id="evidence">Preserve Evidence</button><button id="scale">Scale Everything</button><button id="delete" class="danger">Delete Checkpoint</button><button id="reset">Reset</button></div></div><div class="card"><h2>Alert Feed</h2><div id="alerts" class="alerts"></div></div></div></section>
+<section id="kafka" class="tab"><div class="grid"><div class="card"><h2>loyalty.events partitions</h2><table><thead><tr><th>P</th><th>Lag</th><th>Input/s</th><th>Consumer</th></tr></thead><tbody id="parts"></tbody></table></div><div class="card"><h2>Operations</h2><div class="actions"><button id="inspectKeys" class="primary">Inspect Key Distribution</button><button id="addConsumers">Add 8 Consumers</button><button id="fixKey">Fix Partition Key</button></div><pre id="kout">Choose an operation.</pre></div></div></section>
+<section id="dbx" class="tab"><div class="grid"><div class="card"><h2>Silver Dedupe Notebook</h2><textarea id="dbxcode">clean = (
+  events
+    .dropDuplicates(["event_id"])
+)</textarea><div class="actions"><button id="runDbx" class="primary">Run Cell</button><button id="dbxFix">Load Fix</button></div></div><div class="card"><h2>Streaming Output</h2><pre id="dbxout">State rows: 74,218,402
+Memory: 91%
+Batch: 142 sec
+Trigger: 60 sec
+WARNING: state continues growing.</pre></div></div></section>
+<section id="snow" class="tab"><div class="grid"><div class="card"><h2>Snowflake Worksheet</h2><textarea id="sql">SELECT *
+FROM fact_event
+WHERE TO_DATE(event_ts) = '2026-08-07'
+  AND property_id = 101;</textarea><div class="actions"><button id="runSql" class="primary">Run Query</button><button id="profile">Query Profile</button><button id="sqlFix">Load Range Fix</button></div></div><div class="card"><h2>Result / Profile</h2><pre id="sout">Runtime: 31m 14s
+Bytes scanned: 24.1 TB
+Pruning: 0.59%
+Credits: 8.4</pre></div></div></section>
+<section id="join" class="tab"><div class="grid"><div class="card"><h2>Join Explosion</h2><pre>FACT rows: 12,000,000
+DIM rows: 8,000,000
+Expected: ~12,000,000
+Actual: 1,401,882,002
+ROW MULTIPLICATION: 116.8x</pre><textarea id="joinsql">SELECT customer_id, COUNT(*)
+FROM dim_customer
+GROUP BY customer_id
+HAVING COUNT(*) > 1;</textarea><div class="actions"><button id="checkJoin" class="primary">Run Cardinality Check</button><button id="fixJoin">Apply Safe Join</button></div></div><div class="card"><h2>Investigation</h2><pre id="jout">Prove join cardinality before changing the model.</pre></div></div></section>
+<section id="recon" class="tab"><div class="grid"><div class="card"><h2>Control Totals</h2><table><thead><tr><th>Layer</th><th>Count</th><th>Points</th></tr></thead><tbody><tr><td>SOURCE</td><td>500,000</td><td>8,214,320</td></tr><tr><td>ACCEPTED</td><td>497,820</td><td>8,180,290</td></tr><tr><td>REJECTED</td><td>1,280</td><td>19,100</td></tr><tr><td>DUPLICATES</td><td>900</td><td>14,930</td></tr></tbody></table></div><div class="card"><h2>Acceptance Gate</h2><pre id="rout">Run reconciliation.</pre><div class="actions"><button id="runRecon" class="primary">Run Reconciliation</button><button id="publish" class="danger">OPEN PUBLICATION</button></div></div></div></section>
+<section id="cicd" class="tab"><div class="grid"><div class="card"><h2>Release 2026.08.07.3</h2><pre id="deploy">Build                    PASS
+Unit tests               PASS
+dbt tests                PASS
+Security scan            PASS
+Deployment               PASS
+Post-deploy recon        FAIL
+Duplicate rewards        17
+Residual                 $750</pre></div><div class="card"><h2>Decision</h2><div class="actions"><button id="rollback" class="primary">Rollback Release</button><button id="declare" class="danger">Declare Success Anyway</button></div><pre id="cout">Code deployment succeeded. Data acceptance failed.</pre></div></div></section>
+<section id="repair" class="tab"><div class="card"><h2>Broken Pipeline Repair Bay</h2><p class="muted">Select a defect. Diagnose the root cause before revealing the repair.</p><div id="defects"></div></div><div class="grid"><div class="card"><h3 id="dtitle">Select a defect</h3><p id="dsym"></p><pre id="dbad">Broken code / design appears here.</pre></div><div class="card"><h3>Diagnosis</h3><div id="dopts"></div><pre id="dfb">Choose a root cause.</pre></div></div></section>
+<section id="handoff" class="tab"><div class="grid"><div class="card"><h2>End-of-Shift Handoff</h2><textarea id="handoff" placeholder="Current health, business impact, timeline, containment, root causes, changes, reconciliation, residual risk, watch metrics, owner..."></textarea><button id="grade" class="primary">Grade Handoff</button></div><div class="card"><h2>Incident Scorecard</h2><div id="scorecard"></div><pre id="hout">Complete the incident, then write the handoff.</pre></div></div></section>
+</main><script src="/simulators/production-control-room.js"></script></body></html>

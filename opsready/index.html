@@ -6,6 +6,7 @@
   <meta name="description" content="OpsReady DataOps Proficiency & Resilience Center - recurring engineering proficiency, incident simulation, SOP validation, and FinOps readiness." />
   <title>OpsReady | DataOps Proficiency & Resilience Center</title>
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/v2.css" />
 </head>
 <body>
   <header class="topbar">
@@ -26,6 +27,7 @@
     <aside class="sidebar">
       <nav id="nav">
         <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item control-nav" data-view="control-room">Production Control Room</button>
         <button class="nav-item" data-view="weekly">Weekly Micro-Drill</button>
         <button class="nav-item" data-view="monthly">Monthly Incident</button>
         <button class="nav-item" data-view="sop">SOP & Standards</button>
@@ -73,7 +75,7 @@
           <article class="panel">
             <div class="panel-head"><h2>Recommended next action</h2><span class="pill warning">Priority</span></div>
             <div id="nextAction" class="callout"></div>
-            <button class="btn btn-primary jump-btn" data-jump="finops">Start FinOps Lab</button>
+            <button class="btn btn-primary jump-btn" data-jump="control-room">Enter Production Control Room</button>
           </article>
         </div>
 
@@ -84,6 +86,36 @@
           </div>
           <p class="muted">A green orchestration status is not a publication acceptance gate. Production correctness must be proven through business controls and reconciliation.</p>
         </article>
+      </section>
+
+      <section id="control-room" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">HIGH-FIDELITY PRODUCTION PRACTICE</div><h1>Production Control Room</h1><p>Operate the same richer simulation windows used during technical preparation. Diagnose real failure patterns, execute console actions, complete runbooks, and prove recovery.</p></div>
+          <span class="pill danger">LIVE INCIDENT LAB</span>
+        </div>
+        <div class="control-metrics">
+          <article class="metric-card"><span>Primary environment</span><strong>Neon Harbor</strong><small>Casino + hotel + loyalty</small></article>
+          <article class="metric-card"><span>Broken-pipeline defects</span><strong>30</strong><small>End-to-end repair bay</small></article>
+          <article class="metric-card"><span>Last captured score</span><strong id="labScore">—</strong><small id="labScoreSub">Run a graded lab</small></article>
+          <article class="metric-card"><span>Readiness model</span><strong>Action Based</strong><small>Diagnose → repair → prove</small></article>
+        </div>
+        <article class="panel control-panel">
+          <div class="control-toolbar">
+            <button class="btn btn-primary control-launch active" data-src="/simulators/neon-harbor-production.html" data-title="Neon Harbor Production Control Room">Live Shift Control Room</button>
+            <button class="btn control-launch" data-src="/simulators/broken-pipeline-30.html" data-title="30-Defect Broken Pipeline Repair Bay">Broken Pipeline Repair Bay</button>
+            <button class="btn control-launch" data-src="/simulators/daily-operations.html" data-title="Daily Operations SOP">Daily Operations</button>
+            <button id="openControlFull" class="btn">Open Full Screen</button>
+          </div>
+          <div class="control-frame-wrap"><iframe id="controlFrame" src="/simulators/neon-harbor-production.html" title="OpsReady Production Control Room"></iframe></div>
+          <div class="control-foot">
+            <div><strong id="controlTitle">Neon Harbor Production Control Room</strong><p class="muted">Use the embedded Snowflake console, Databricks workbook, incident drills, daily shift tasks, file map, and handoff grader.</p></div>
+            <button id="captureLabScore" class="btn btn-primary">Capture Current Lab Score</button>
+          </div>
+        </article>
+        <div class="two-col">
+          <article class="panel"><h2>What is graded</h2><div class="grading-chips"><span>Diagnosis</span><span>Streaming</span><span>SQL / Snowflake</span><span>Databricks</span><span>Reconciliation</span><span>FinOps</span><span>Safe recovery</span><span>Handoff</span></div></article>
+          <article class="panel"><h2>Production standard</h2><p>Do not merely describe a fix. Inspect evidence, execute the repair path, validate control totals, and keep publication blocked until business acceptance passes.</p></article>
+        </div>
       </section>
 
       <section id="weekly" class="view">
@@ -160,15 +192,10 @@
 
       <section id="simulators" class="view">
         <div class="section-head">
-          <div><div class="eyebrow">LAB</div><h1>Simulation Library</h1><p>Recurring drills built into the SOP proficiency cycle.</p></div>
-          <span class="pill">MVP Demo</span>
+          <div><div class="eyebrow">LAB</div><h1>Simulation Library</h1><p>High-fidelity practice assets embedded into the proficiency program.</p></div>
+          <span class="pill">Production Labs</span>
         </div>
-        <div class="card-grid">
-          <article class="sim-card"><span class="pill">Weekly</span><h3>Streaming Lag Drill</h3><p class="muted">Calculate backlog growth, localize the constrained layer, and state the operating invariant.</p><button class="btn btn-primary jump-btn" data-jump="weekly">Launch Drill</button></article>
-          <article class="sim-card"><span class="pill danger">SEV1</span><h3>Friday Night Cascade</h3><p class="muted">Contain a multi-layer casino loyalty incident and prove the recovery before reopening.</p><button class="btn btn-primary jump-btn" data-jump="monthly">Launch Incident</button></article>
-          <article class="sim-card"><span class="pill warning">FinOps</span><h3>Snowflake Cost Pathology</h3><p class="muted">Distinguish bad query design from genuine compute shortage before scaling.</p><button class="btn btn-primary jump-btn" data-jump="finops">Launch Lab</button></article>
-          <article class="sim-card"><span class="pill">Continuous Learning</span><h3>Incident → Training</h3><p class="muted">Turn a sanitized real incident into a future proficiency scenario.</p><button class="btn btn-primary jump-btn" data-jump="incident-training">Create Drill</button></article>
-        </div>
+        <div id="simulatorCards" class="card-grid"></div>
       </section>
 
       <section id="finops" class="view">
@@ -261,6 +288,17 @@
     </main>
   </div>
 
+  <div id="simModal" class="modal hidden">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div><div class="eyebrow">SIMULATION LAB</div><h2 id="simTitle">Simulator</h2></div>
+        <button id="closeSim" class="btn btn-ghost">Close</button>
+      </div>
+      <iframe id="simFrame" title="Training simulator"></iframe>
+    </div>
+  </div>
+
   <script src="/app.js"></script>
+  <script src="/simulators.js"></script>
 </body>
 </html>
