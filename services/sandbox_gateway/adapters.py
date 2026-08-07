@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import os
 import time
 from dataclasses import dataclass
@@ -25,9 +24,11 @@ class SnowflakeAdapter:
     platform = "snowflake"
 
     def __init__(self) -> None:
-        self.account = os.getenv("SNOWFLAKE_ACCOUNT", "")
+        self.account = os.getenv("SNOWFLAKE_ACCOUNT", "") or os.getenv("SNOWFLAKE_ACCOUNT_IDENTIFIER", "")
         self.user = os.getenv("SNOWFLAKE_USER", "")
         self.password = os.getenv("SNOWFLAKE_PASSWORD", "")
+        self.private_key_file = os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH", "")
+        self.private_key_passphrase = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE", "")
         self.role = os.getenv("SNOWFLAKE_ROLE", "OPSREADY_TRAINER")
         self.warehouse = os.getenv("SNOWFLAKE_WAREHOUSE", "OPSREADY_WH")
         self.database = os.getenv("SNOWFLAKE_TRAINING_DATABASE", "OPSREADY_TRAINING")
@@ -35,29 +36,41 @@ class SnowflakeAdapter:
 
     @property
     def available(self) -> bool:
-        return bool(self.account and self.user and self.password and self.warehouse)
+        auth_ready = bool(self.password or self.private_key_file)
+        return bool(self.account and self.user and auth_ready and self.warehouse and self.database)
 
     def _connect(self):
         import snowflake.connector
 
-        return snowflake.connector.connect(
-            account=self.account,
-            user=self.user,
-            password=self.password,
-            role=self.role,
-            warehouse=self.warehouse,
-            database=self.database,
-            session_parameters={"QUERY_TAG": "OPSREADY_SANDBOX"},
-        )
+        kwargs: dict[str, Any] = {
+            "account": self.account,
+            "user": self.user,
+            "role": self.role,
+            "warehouse": self.warehouse,
+            "database": self.database,
+            "session_parameters": {"QUERY_TAG": "OPSREADY_SANDBOX"},
+        }
+        if self.private_key_file:
+            kwargs.update(
+                {
+                    "authenticator": "SNOWFLAKE_JWT",
+                    "private_key_file": self.private_key_file,
+                }
+            )
+            if self.private_key_passphrase:
+                kwargs["private_key_file_pwd"] = self.private_key_passphrase
+        elif self.password:
+            kwargs["password"] = self.password
+        else:
+            raise RuntimeError("Snowflake authentication is not configured.")
+        return snowflake.connector.connect(**kwargs)
 
     def create_session(self, schema: str, admin_lab: bool) -> str:
         if admin_lab and not self.allow_admin:
             raise SandboxPolicyError("Snowflake admin labs are disabled on this gateway.")
         with self._connect() as conn:
             cur = conn.cursor()
-            cur.execute(
-                f'CREATE SCHEMA IF NOT EXISTS "{schema}" DATA_RETENTION_TIME_IN_DAYS = 0'
-            )
+            cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}" DATA_RETENTION_TIME_IN_DAYS = 0')
         return f"{self.database}.{schema}"
 
     def execute(self, schema: str, code: str, *, admin_lab: bool) -> AdapterResponse:
@@ -130,9 +143,7 @@ class DatabricksAdapter:
         }
         started = time.perf_counter()
         with httpx.Client(timeout=35) as client:
-            response = client.post(
-                f"{self.host}/api/2.0/sql/statements", headers=self.headers, json=payload
-            )
+            response = client.post(f"{self.host}/api/2.0/sql/statements", headers=self.headers, json=payload)
             response.raise_for_status()
             data = response.json()
             statement_id = data.get("statement_id")
@@ -140,9 +151,7 @@ class DatabricksAdapter:
             deadline = time.time() + 60
             while statement_id and state in {"PENDING", "RUNNING"} and time.time() < deadline:
                 time.sleep(1)
-                response = client.get(
-                    f"{self.host}/api/2.0/sql/statements/{statement_id}", headers=self.headers
-                )
+                response = client.get(f"{self.host}/api/2.0/sql/statements/{statement_id}", headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
                 state = data.get("status", {}).get("state", "UNKNOWN")
