@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="OpsReady DataOps Proficiency & Resilience Center - recurring engineering proficiency, incident simulation, SOP validation, and FinOps readiness." />
+  <title>OpsReady | DataOps Proficiency & Resilience Center</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">OR</div>
+      <div>
+        <div class="brand-name">OpsReady</div>
+        <div class="brand-sub">DataOps Proficiency & Resilience Center</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="pill demo-pill">DEMO ENVIRONMENT</span>
+      <button id="roleToggle" class="btn btn-ghost" type="button">Switch to Manager View</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <nav id="nav">
+        <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item" data-view="weekly">Weekly Micro-Drill</button>
+        <button class="nav-item" data-view="monthly">Monthly Incident</button>
+        <button class="nav-item" data-view="sop">SOP & Standards</button>
+        <button class="nav-item" data-view="simulators">Simulation Lab</button>
+        <button class="nav-item" data-view="finops">FinOps Lab</button>
+        <button class="nav-item" data-view="incident-training">Incident → Training</button>
+        <button class="nav-item" data-view="certification">Certification</button>
+        <button class="nav-item manager-only hidden" data-view="manager">Manager Dashboard</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="small muted">Fictional training environment</div>
+        <div class="small">Casino • Hotel • Loyalty • Digital</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section id="dashboard" class="view active">
+        <div class="hero">
+          <div>
+            <div class="eyebrow">ENGINEERING READINESS</div>
+            <h1>Break it. Fix it. Prove it. Repeat.</h1>
+            <p>Recurring proficiency validation for Snowflake, Databricks, Kafka, SQL, data quality, incident response, security, FinOps, agents, and ML operations.</p>
+          </div>
+          <div class="hero-score">
+            <div class="score-ring" id="overallRing"><span id="overallScore">84%</span></div>
+            <div>
+              <div class="small muted">Current readiness</div>
+              <strong id="readinessLabel">Production Ready</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card"><span>Weekly drill</span><strong id="weeklyStatus">Due</strong><small>10-15 min</small></article>
+          <article class="metric-card"><span>Monthly incident</span><strong id="monthlyStatus">Due</strong><small>30-45 min</small></article>
+          <article class="metric-card"><span>Cost awareness</span><strong id="costScore">78%</strong><small>Target ≥ 85%</small></article>
+          <article class="metric-card"><span>Reliability</span><strong id="reliabilityScore">91%</strong><small>Idempotency + recovery</small></article>
+        </div>
+
+        <div class="two-col">
+          <article class="panel">
+            <div class="panel-head"><h2>Skill heatmap</h2><span class="pill">Target 85%+</span></div>
+            <div id="skillHeatmap"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><h2>Recommended next action</h2><span class="pill warning">Priority</span></div>
+            <div id="nextAction" class="callout"></div>
+            <button class="btn btn-primary jump-btn" data-jump="finops">Start FinOps Lab</button>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-head"><h2>Operating standard</h2><span class="pill">SOP-DR-001</span></div>
+          <div class="standard-flow">
+            <div>Observe</div><span>→</span><div>Diagnose</div><span>→</span><div>Contain</div><span>→</span><div>Repair</div><span>→</span><div>Reconcile</div><span>→</span><div>Publish</div><span>→</span><div>Learn</div>
+          </div>
+          <p class="muted">A green orchestration status is not a publication acceptance gate. Production correctness must be proven through business controls and reconciliation.</p>
+        </article>
+      </section>
+
+      <section id="weekly" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">WEEKLY</div><h1>Micro-Drill</h1><p>One short production problem to prevent skill decay.</p></div>
+          <span class="pill">10-15 minutes</span>
+        </div>
+        <article class="panel">
+          <div class="scenario-meta"><span class="pill danger">SEV2</span><span class="pill">Kafka + Databricks</span><span class="pill">Business: Loyalty Freshness</span></div>
+          <h2>Lag is growing during a Friday evening surge</h2>
+          <div class="metric-grid compact">
+            <article class="metric-card"><span>Input</span><strong>14,000/s</strong></article>
+            <article class="metric-card"><span>Processed</span><strong>11,000/s</strong></article>
+            <article class="metric-card"><span>Lag</span><strong>1.8M</strong></article>
+            <article class="metric-card"><span>Snowflake sink</span><strong>Normal</strong></article>
+          </div>
+          <div class="question-block">
+            <h3>1. How fast is backlog growing?</h3>
+            <input id="lagMath" class="input" placeholder="Example: 3,000 events/sec" />
+            <h3>2. What is the first constrained layer you investigate?</h3>
+            <select id="lagLayer" class="input">
+              <option value="">Choose...</option>
+              <option>Snowflake warehouse size</option>
+              <option>Databricks processing / partition skew</option>
+              <option>dbt documentation</option>
+              <option>API cache</option>
+            </select>
+            <h3>3. State your production invariant.</h3>
+            <textarea id="lagInvariant" class="input" rows="3" placeholder="What must remain true?"></textarea>
+            <button id="gradeWeekly" class="btn btn-primary" type="button">Grade Drill</button>
+            <div id="weeklyFeedback" class="feedback hidden"></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="monthly" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">MONTHLY</div><h1>Incident Simulation</h1><p>A longer scenario requiring diagnosis, code repair, validation, and handoff.</p></div>
+          <span class="pill">30-45 minutes</span>
+        </div>
+        <article class="panel">
+          <div class="scenario-meta"><span class="pill danger">SEV1</span><span class="pill">End-to-End</span><span class="pill">Reward Integrity</span></div>
+          <h2>Friday Night Cascade</h2>
+          <p>Concert surge → hot Kafka partition → Databricks backlog → slow Snowflake MERGE → dbt late-event miss → stale mobile eligibility → duplicate rewards on replay.</p>
+          <div class="dependency-line">
+            <span>Source</span><i>→</i><span>Kafka</span><i>→</i><span>Databricks</span><i>→</i><span>Delta</span><i>→</i><span>Snowflake</span><i>→</i><span>dbt</span><i>→</i><span>API</span>
+          </div>
+          <div class="question-block">
+            <label>First containment action</label>
+            <select id="containment" class="input">
+              <option value="">Choose...</option>
+              <option>Scale everything</option>
+              <option>Contain unsafe reward publication and preserve evidence</option>
+              <option>Delete checkpoint and restart</option>
+              <option>Ignore until lag drains</option>
+            </select>
+            <label>Write the repair order</label>
+            <textarea id="repairOrder" class="input" rows="5" placeholder="Contain → snapshot → diagnose by control point → ..."></textarea>
+            <label>Acceptance evidence before reopening</label>
+            <textarea id="acceptanceEvidence" class="input" rows="5" placeholder="Counts, keys, dollars/points, duplicates, lag, API p95, etc."></textarea>
+            <button id="gradeMonthly" class="btn btn-primary">Grade Incident</button>
+            <div id="monthlyFeedback" class="feedback hidden"></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="sop" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">STANDARDS</div><h1>SOP & Business Controls</h1><p>Versioned rules that engineers must acknowledge and demonstrate.</p></div>
+          <span class="pill">v1.0 Demo</span>
+        </div>
+        <div id="sopList" class="card-list"></div>
+      </section>
+
+      <section id="simulators" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">LAB</div><h1>Simulation Library</h1><p>Recurring drills built into the SOP proficiency cycle.</p></div>
+          <span class="pill">MVP Demo</span>
+        </div>
+        <div class="card-grid">
+          <article class="sim-card"><span class="pill">Weekly</span><h3>Streaming Lag Drill</h3><p class="muted">Calculate backlog growth, localize the constrained layer, and state the operating invariant.</p><button class="btn btn-primary jump-btn" data-jump="weekly">Launch Drill</button></article>
+          <article class="sim-card"><span class="pill danger">SEV1</span><h3>Friday Night Cascade</h3><p class="muted">Contain a multi-layer casino loyalty incident and prove the recovery before reopening.</p><button class="btn btn-primary jump-btn" data-jump="monthly">Launch Incident</button></article>
+          <article class="sim-card"><span class="pill warning">FinOps</span><h3>Snowflake Cost Pathology</h3><p class="muted">Distinguish bad query design from genuine compute shortage before scaling.</p><button class="btn btn-primary jump-btn" data-jump="finops">Launch Lab</button></article>
+          <article class="sim-card"><span class="pill">Continuous Learning</span><h3>Incident → Training</h3><p class="muted">Turn a sanitized real incident into a future proficiency scenario.</p><button class="btn btn-primary jump-btn" data-jump="incident-training">Create Drill</button></article>
+        </div>
+      </section>
+
+      <section id="finops" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">COST CONTROL</div><h1>FinOps Lab</h1><p>Prove that you can improve cost without sacrificing correctness or SLA.</p></div>
+          <span class="pill warning">Current weak domain</span>
+        </div>
+        <article class="panel">
+          <h2>Warehouse optimization exercise</h2>
+          <p>A Snowflake query scans 24 TB to return a one-property, one-day slice. The team proposes moving from Medium to 4XL.</p>
+          <div class="question-block">
+            <label>First action</label>
+            <select id="finopsAction" class="input">
+              <option value="">Choose...</option>
+              <option>Scale to 4XL immediately</option>
+              <option>Inspect query profile, pruning, joins, spill, and filter design</option>
+              <option>Remove the WHERE clause</option>
+              <option>Disable auto-suspend</option>
+            </select>
+            <label>Estimated monthly avoidable compute ($)</label>
+            <input id="avoidableCost" class="input" type="number" value="27000" />
+            <label>Optimization plan</label>
+            <textarea id="finopsPlan" class="input" rows="5" placeholder="Fix query first, then right-size compute..."></textarea>
+            <button id="gradeFinops" class="btn btn-primary">Grade FinOps Lab</button>
+            <div id="finopsFeedback" class="feedback hidden"></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="incident-training" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">CONTINUOUS LEARNING</div><h1>Incident → Training Generator</h1><p>Turn sanitized production lessons into future drills.</p></div>
+          <span class="pill">Manager Workflow</span>
+        </div>
+        <article class="panel">
+          <div class="form-grid">
+            <label>Incident title<input id="incTitle" class="input" placeholder="Snowflake task backlog" /></label>
+            <label>Business impact<input id="incImpact" class="input" placeholder="Loyalty mart freshness missed by 42 min" /></label>
+            <label>Root cause<input id="incRoot" class="input" placeholder="Unnecessary serial dependencies" /></label>
+            <label>Required invariant<input id="incInvariant" class="input" placeholder="Critical data product must meet freshness SLA" /></label>
+          </div>
+          <label>Correct recovery / lesson<textarea id="incLesson" class="input" rows="4"></textarea></label>
+          <button id="generateTraining" class="btn btn-primary">Generate Future Drill</button>
+          <div id="generatedDrill" class="generated hidden"></div>
+        </article>
+      </section>
+
+      <section id="certification" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">READINESS</div><h1>Certification Ladder</h1><p>Proficiency is earned through repeated demonstration, not attendance.</p></div>
+        </div>
+        <div class="cert-grid">
+          <article class="cert-card achieved"><span>Level 1</span><h2>Operator</h2><p>Daily health, SQL controls, basic recovery.</p><strong>Achieved</strong></article>
+          <article class="cert-card achieved"><span>Level 2</span><h2>Production Engineer</h2><p>Streaming, idempotency, reconciliation, deployments.</p><strong>Achieved</strong></article>
+          <article class="cert-card current"><span>Level 3</span><h2>Senior Resilience</h2><p>Multi-layer incidents, cost/performance, architecture tradeoffs.</p><strong>84% / 90%</strong></article>
+          <article class="cert-card"><span>Level 4</span><h2>Staff / Principal</h2><p>System design, standards, cross-team risk reduction.</p><strong>Locked</strong></article>
+        </div>
+      </section>
+
+      <section id="manager" class="view">
+        <div class="section-head">
+          <div><div class="eyebrow">MANAGER</div><h1>Team Readiness Dashboard</h1><p>Identify risk before it reaches production.</p></div>
+          <span class="pill">Demo data</span>
+        </div>
+        <div class="metric-grid">
+          <article class="metric-card"><span>Team readiness</span><strong>88%</strong><small>Target 90%</small></article>
+          <article class="metric-card"><span>Overdue drills</span><strong>3</strong><small>Across 12 engineers</small></article>
+          <article class="metric-card"><span>Weakest domain</span><strong>FinOps</strong><small>76% avg</small></article>
+          <article class="metric-card"><span>Incident recovery</span><strong>92%</strong><small>+8 pts QoQ</small></article>
+        </div>
+        <article class="panel">
+          <div class="panel-head"><h2>Team proficiency</h2><span class="pill">12 engineers</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Engineer</th><th>Overall</th><th>Streaming</th><th>Snowflake</th><th>DQ/Recon</th><th>FinOps</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>A. Rivera</td><td>94%</td><td>96%</td><td>92%</td><td>97%</td><td>85%</td><td><span class="pill success">Ready</span></td></tr>
+                <tr><td>M. Chen</td><td>91%</td><td>89%</td><td>95%</td><td>93%</td><td>82%</td><td><span class="pill success">Ready</span></td></tr>
+                <tr><td>J. Patel</td><td>87%</td><td>92%</td><td>86%</td><td>90%</td><td>70%</td><td><span class="pill warning">FinOps Drill</span></td></tr>
+                <tr><td>S. Brooks</td><td>81%</td><td>76%</td><td>84%</td><td>88%</td><td>75%</td><td><span class="pill danger">Coaching</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h2>Recommended next team drill</h2><span class="pill warning">High value</span></div>
+          <div class="callout"><strong>Snowflake Cost + Query Pathology</strong><p>Team performance is strong on reliability but weaker on distinguishing compute shortage from poor pruning, join explosions, and repeated full scans.</p></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

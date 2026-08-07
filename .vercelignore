@@ -1,0 +1,14 @@
+services/
+airflow/
+dbt/
+snowflake/
+tests/
+scripts/
+notebooks/
+src/
+**/*.py
+requirements*.txt
+pyproject.toml
+project.toml
+docker-compose.yml
+Makefile
