@@ -1,0 +1,192 @@
+(() => {
+  'use strict';
+  const KEY = 'opsreadySandboxGateway';
+  const SESSION_KEY = 'opsreadySandboxSessions';
+  const EVIDENCE_KEY = 'opsreadyV6LiveEvidence';
+  const platformKey = { Snowflake: 'snowflake', Databricks: 'databricks', 'SQL Server': 'sqlserver' };
+  let capabilities = [];
+  let sessions = {};
+  try { sessions = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}'); } catch (_) { sessions = {}; }
+
+  const gateway = () => (localStorage.getItem(KEY) || 'http://localhost:8090').replace(/\/$/, '');
+  const saveSessions = () => localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+  function evidence(item) {
+    let rows = [];
+    try { rows = JSON.parse(localStorage.getItem(EVIDENCE_KEY) || '[]'); } catch (_) {}
+    rows.push({ ...item, at: new Date().toISOString() });
+    localStorage.setItem(EVIDENCE_KEY, JSON.stringify(rows.slice(-100)));
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(`${gateway()}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    });
+    let data = {};
+    try { data = await response.json(); } catch (_) {}
+    if (!response.ok) throw new Error(data.detail || data.message || `Gateway HTTP ${response.status}`);
+    return data;
+  }
+
+  function renderCloudControls() {
+    const section = document.getElementById('cloud');
+    if (!section || section.querySelector('#sandboxGatewayPanel')) return;
+    const panel = document.createElement('article');
+    panel.className = 'panel sandbox-gateway';
+    panel.id = 'sandboxGatewayPanel';
+    panel.innerHTML = `
+      <div class="sandbox-head">
+        <div><small>LIVE EXECUTION</small><h3>Isolated Sandbox Gateway</h3><p>Credentials stay on the server-side gateway. The browser stores only the gateway URL and short-lived sandbox session IDs.</p></div>
+        <span id="gatewayState" class="sandbox-status">Not checked</span>
+      </div>
+      <div class="sandbox-config">
+        <label>Gateway URL<input id="gatewayUrl" value="${esc(gateway())}" placeholder="https://your-sandbox-gateway.example.com"></label>
+        <label class="sandbox-check"><input id="adminLab" type="checkbox"> <span>Admin-lab profile (dedicated training account only)</span></label>
+        <div class="sandbox-actions"><button id="gatewayCheck" type="button">Test Gateway</button><button id="cleanupSessions" type="button">Clean Up My Sessions</button></div>
+      </div>
+      <div id="capabilityGrid" class="sandbox-capabilities"></div>
+      <div class="sandbox-note"><b>Execution model:</b> Snowflake uses the Python connector; Databricks SQL uses Statement Execution and optional Python uses a bounded classic-cluster command context; SQL Server uses a disposable training database. Account-level operations remain blocked unless the gateway explicitly enables admin labs.</div>
+      <pre id="gatewayLog" class="sandbox-log">Configure/start the gateway, then choose Test Gateway.</pre>`;
+    const cloudCards = section.querySelector('.cloud');
+    section.insertBefore(panel, cloudCards || null);
+
+    const url = panel.querySelector('#gatewayUrl');
+    url.addEventListener('change', () => {
+      localStorage.setItem(KEY, url.value.trim().replace(/\/$/, ''));
+      capabilities = [];
+      renderCapabilities();
+    });
+    panel.querySelector('#gatewayCheck').addEventListener('click', checkGateway);
+    panel.querySelector('#cleanupSessions').addEventListener('click', cleanupAll);
+    panel.querySelectorAll('button').forEach((b) => b.dataset.wired = 'true');
+    renderCapabilities();
+  }
+
+  function renderCapabilities() {
+    const host = document.getElementById('capabilityGrid');
+    if (!host) return;
+    const rows = capabilities.length ? capabilities : [
+      { platform:'snowflake', available:false, sql:true, note:'Gateway not checked.' },
+      { platform:'databricks', available:false, sql:true, python:false, note:'Gateway not checked.' },
+      { platform:'sqlserver', available:false, sql:true, note:'Gateway not checked.' },
+    ];
+    host.innerHTML = rows.map((c) => `<article class="sandbox-cap ${c.available ? 'available' : ''}"><b>${esc(c.platform)}</b><strong>${c.available ? 'READY' : 'OFFLINE'}</strong><span>SQL ${c.sql ? '✓' : '—'}${c.platform === 'databricks' ? ` • Python ${c.python ? '✓' : '—'}` : ''}${c.admin_labs ? ' • Admin labs ✓' : ''}</span><small>${esc(c.note || '')}</small></article>`).join('');
+  }
+
+  function log(text, ok = true) {
+    const node = document.getElementById('gatewayLog');
+    if (node) { node.textContent = text; node.classList.toggle('bad', !ok); }
+  }
+
+  async function checkGateway() {
+    const state = document.getElementById('gatewayState');
+    if (state) state.textContent = 'Checking…';
+    try {
+      await api('/health');
+      capabilities = await api('/capabilities');
+      if (state) { state.textContent = 'Gateway online'; state.className = 'sandbox-status online'; }
+      renderCapabilities();
+      log(`Gateway online: ${gateway()}\n${capabilities.map((c) => `${c.platform}: ${c.available ? 'configured' : 'not configured'}`).join('\n')}`);
+    } catch (error) {
+      if (state) { state.textContent = 'Gateway unavailable'; state.className = 'sandbox-status offline'; }
+      capabilities = [];
+      renderCapabilities();
+      const mixed = location.protocol === 'https:' && gateway().startsWith('http://');
+      log(`${error.message}${mixed ? '\nThis HTTPS page cannot call an HTTP gateway. Use a deployed HTTPS gateway or run OpsReady locally over HTTP.' : ''}`, false);
+    }
+  }
+
+  function capability(platform) {
+    return capabilities.find((c) => c.platform === platformKey[platform]);
+  }
+
+  async function ensureSession(platform) {
+    const key = platformKey[platform];
+    const cap = capability(platform);
+    if (!cap?.available) {
+      await checkGateway();
+      if (!capability(platform)?.available) throw new Error(`${platform} is not configured on this gateway.`);
+    }
+    if (sessions[key]?.session_id) return sessions[key];
+    const admin = !!document.getElementById('adminLab')?.checked;
+    const created = await api('/sessions', { method:'POST', body: JSON.stringify({ platform:key, admin_lab:admin }) });
+    sessions[key] = created;
+    saveSessions();
+    log(`${platform} isolated session created.\nNamespace: ${created.namespace}\nExpires in: ${created.expires_in_minutes} minutes`);
+    return created;
+  }
+
+  function detectLanguage(platform, code) {
+    if (platform !== 'Databricks') return 'sql';
+    const trimmed = code.trim().toLowerCase();
+    if (/^(select|create|alter|drop|merge|insert|update|delete|grant|revoke|with|show|describe|use)\b/.test(trimmed)) return 'sql';
+    return 'python';
+  }
+
+  function unsupportedReason(platform, code) {
+    const c = code.toLowerCase();
+    if (platform === 'Databricks' && (c.includes('databricks bundle ') || c.includes('resources:\n') || c.includes('resources:'))) {
+      return 'This task is a Databricks CLI/Declarative Automation Bundle deployment task, not a notebook/SQL command. Run it in the simulated grader or wire a CI runner; the live gateway intentionally does not expose arbitrary shell execution.';
+    }
+    if (code.includes('...')) return 'Replace the starter ellipsis (...) with executable code before sending it to a real sandbox.';
+    return '';
+  }
+
+  async function executeLive(platform, taskId) {
+    if (!window.OpsReadyV6) return;
+    const current = window.OpsReadyV6.current(platform);
+    if (!current || current.task.id !== taskId) return;
+    const output = current.work.querySelector('.task-output');
+    const blocked = unsupportedReason(platform, current.code);
+    if (blocked) {
+      output.textContent = `REAL EXECUTION NOT SENT\n${blocked}`;
+      window.OpsReadyV6.recordLive(platform, taskId, false, blocked);
+      return;
+    }
+    output.textContent = 'Creating/reusing isolated sandbox session…';
+    try {
+      const session = await ensureSession(platform);
+      const language = detectLanguage(platform, current.code);
+      const cap = capability(platform);
+      if (language === 'python' && !cap?.python) throw new Error('Databricks Python execution is not configured. Set DATABRICKS_CLUSTER_ID on the gateway or use a SQL task.');
+      output.textContent = `Executing ${language.toUpperCase()} in ${session.namespace}…`;
+      const result = await api('/execute', {
+        method:'POST',
+        body: JSON.stringify({ session_id:session.session_id, task_id:taskId, code:current.code, language }),
+      });
+      const table = result.rows?.length ? `\nColumns: ${(result.columns || []).join(' | ')}\n${result.rows.slice(0, 10).map((r) => r.join(' | ')).join('\n')}` : '';
+      const detail = `${result.message} ${result.elapsed_ms != null ? `(${result.elapsed_ms} ms)` : ''}${result.statement_id ? ` • ID ${result.statement_id}` : ''}`;
+      output.textContent = `REAL SANDBOX SUCCEEDED\n${detail}${table}`;
+      evidence({ platform, taskId, namespace:session.namespace, success:true, elapsed_ms:result.elapsed_ms, statement_id:result.statement_id || null });
+      window.OpsReadyV6.recordLive(platform, taskId, true, detail);
+    } catch (error) {
+      output.textContent = `REAL SANDBOX FAILED\n${error.message}`;
+      evidence({ platform, taskId, success:false, error:error.message });
+      window.OpsReadyV6.recordLive(platform, taskId, false, error.message);
+    }
+  }
+
+  async function cleanupAll() {
+    const keys = Object.keys(sessions);
+    if (!keys.length) { log('No browser-owned sandbox sessions to clean up.'); return; }
+    const results = [];
+    for (const key of keys) {
+      const session = sessions[key];
+      try {
+        await api(`/sessions/${encodeURIComponent(session.session_id)}`, { method:'DELETE' });
+        results.push(`${key}: cleaned`);
+      } catch (error) {
+        results.push(`${key}: ${error.message}`);
+      }
+    }
+    sessions = {};
+    saveSessions();
+    log(`Cleanup requested:\n${results.join('\n')}`);
+  }
+
+  document.addEventListener('opsready:v6-live-execute', (event) => executeLive(event.detail.platform, event.detail.taskId));
+  document.addEventListener('opsready:v6-ready', renderCloudControls);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderCloudControls); else renderCloudControls();
+})();
