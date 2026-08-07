@@ -1,0 +1,1 @@
+The OpsReady grading engine now uses partial-credit production rubrics for weekly streaming, monthly incident response, and FinOps exercises.
