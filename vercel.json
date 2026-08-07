@@ -16,6 +16,9 @@
     {"src": "simulators/v4-reasoning-agentops.html", "use": "@vercel/static"},
     {"src": "simulators/v4-reasoning-agentops.css", "use": "@vercel/static"},
     {"src": "simulators/v4-reasoning-agentops.js", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.html", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.css", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.js", "use": "@vercel/static"},
     {"src": "simulators/neon-harbor-production.html", "use": "@vercel/static"},
     {"src": "simulators/broken-pipeline-30.html", "use": "@vercel/static"},
     {"src": "simulators/daily-operations.html", "use": "@vercel/static"}
