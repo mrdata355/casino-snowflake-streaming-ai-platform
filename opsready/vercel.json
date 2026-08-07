@@ -1,13 +1,35 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {"key": "X-Content-Type-Options", "value": "nosniff"},
-        {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}
-      ]
-    }
+  "version": 2,
+  "builds": [
+    {"src": "index.html", "use": "@vercel/static"},
+    {"src": "styles.css", "use": "@vercel/static"},
+    {"src": "v2.css", "use": "@vercel/static"},
+    {"src": "app.js", "use": "@vercel/static"},
+    {"src": "simulators.js", "use": "@vercel/static"},
+    {"src": "manager-evidence.js", "use": "@vercel/static"},
+    {"src": "simulators/production-control-room.html", "use": "@vercel/static"},
+    {"src": "simulators/production-control-room.css", "use": "@vercel/static"},
+    {"src": "simulators/production-control-room.js", "use": "@vercel/static"},
+    {"src": "simulators/defects30-ui.js", "use": "@vercel/static"},
+    {"src": "simulators/advanced-labs.css", "use": "@vercel/static"},
+    {"src": "simulators/advanced-labs.js", "use": "@vercel/static"},
+    {"src": "simulators/v4-reasoning-agentops.html", "use": "@vercel/static"},
+    {"src": "simulators/v4-reasoning-agentops.css", "use": "@vercel/static"},
+    {"src": "simulators/v4-reasoning-agentops.js", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.html", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.css", "use": "@vercel/static"},
+    {"src": "simulators/v5-business-project-quest.js", "use": "@vercel/static"},
+    {"src": "simulators/neon-harbor-production.html", "use": "@vercel/static"},
+    {"src": "simulators/broken-pipeline-30.html", "use": "@vercel/static"},
+    {"src": "simulators/daily-operations.html", "use": "@vercel/static"}
+  ],
+  "routes": [
+    {"src": "/styles.css", "dest": "/styles.css"},
+    {"src": "/v2.css", "dest": "/v2.css"},
+    {"src": "/app.js", "dest": "/app.js"},
+    {"src": "/simulators.js", "dest": "/simulators.js"},
+    {"src": "/manager-evidence.js", "dest": "/manager-evidence.js"},
+    {"src": "/simulators/(.*)", "dest": "/simulators/$1"},
+    {"src": "/(.*)", "dest": "/index.html"}
   ]
 }
