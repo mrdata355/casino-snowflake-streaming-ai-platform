@@ -6,9 +6,11 @@
     {"src": "v2.css", "use": "@vercel/static"},
     {"src": "app.js", "use": "@vercel/static"},
     {"src": "simulators.js", "use": "@vercel/static"},
+    {"src": "manager-evidence.js", "use": "@vercel/static"},
     {"src": "simulators/production-control-room.html", "use": "@vercel/static"},
     {"src": "simulators/production-control-room.css", "use": "@vercel/static"},
     {"src": "simulators/production-control-room.js", "use": "@vercel/static"},
+    {"src": "simulators/defects30-ui.js", "use": "@vercel/static"},
     {"src": "simulators/neon-harbor-production.html", "use": "@vercel/static"},
     {"src": "simulators/broken-pipeline-30.html", "use": "@vercel/static"},
     {"src": "simulators/daily-operations.html", "use": "@vercel/static"}
@@ -18,6 +20,7 @@
     {"src": "/v2.css", "dest": "/v2.css"},
     {"src": "/app.js", "dest": "/app.js"},
     {"src": "/simulators.js", "dest": "/simulators.js"},
+    {"src": "/manager-evidence.js", "dest": "/manager-evidence.js"},
     {"src": "/simulators/(.*)", "dest": "/simulators/$1"},
     {"src": "/(.*)", "dest": "/index.html"}
   ]
