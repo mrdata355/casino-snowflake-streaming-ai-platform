@@ -3,19 +3,17 @@
 [![CI](https://github.com/mrdata355/casino-snowflake-streaming-ai-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mrdata355/casino-snowflake-streaming-ai-platform/actions/workflows/ci.yml)
 [![Security](https://github.com/mrdata355/casino-snowflake-streaming-ai-platform/actions/workflows/security.yml/badge.svg)](https://github.com/mrdata355/casino-snowflake-streaming-ai-platform/actions/workflows/security.yml)
 
-A production-style reference implementation for a senior Snowflake data engineer supporting a casino and resort data platform. The platform ingests transactional and high-frequency event data, builds governed lakehouse products, publishes point-in-time ML features, serves model scores, and enables role-aware conversational analytics.
+An end-to-end data and AI platform for casino and resort analytics. The platform ingests transactional and high-frequency event data, builds governed Snowflake lakehouse products, publishes point-in-time ML features, serves versioned model scores, and supports role-aware conversational analytics.
 
-> **Portfolio disclosure:** This repository uses synthetic data and fictional system identifiers. It is not a production system, was not commissioned or deployed by Hard Rock or another casino operator, and is not affiliated with those organizations.
+All data, identities, and infrastructure names in this repository are synthetic. It is not a production system and is not affiliated with or deployed by a casino operator.
 
-> **Begin here:** Follow the complete [S.T.A.R.T. walkthrough](docs/START_HERE.md) before adding any credentials.
+## Platform capabilities
 
-## What this proves
-
-- Snowflake architecture beyond basic SQL: Snowpipe, Snowpipe Streaming, Streams, Tasks, Dynamic Tables, VARIANT, Time Travel, cloning, RBAC, masking, row access, resource monitors, and query-cost controls.
-- Streaming engineering: Kafka and Pub/Sub ingestion, Spark Structured Streaming, event-time windows, watermarks, deduplication, checkpoint recovery, dead-letter handling, replay, and idempotent sinks.
-- Production delivery: Airflow, dbt, Terraform, GitHub Actions, contracts, testing, observability, runbooks, backfills, incident response, and controlled promotion.
-- AI/ML data enablement: point-in-time feature products, leakage prevention, MLflow, governed scoring outputs, drift checks, feature APIs, and Cortex semantic consumption.
-- Casino business logic: gaming revenue, slot utilization, player value, offer attribution, labor efficiency, and location profitability.
+- Snowflake architecture: Snowpipe, Snowpipe Streaming, Streams, Tasks, Dynamic Tables, VARIANT, Time Travel, cloning, RBAC, masking, row-access policies, resource monitors, and query-cost controls.
+- Streaming processing: Kafka and Pub/Sub ingestion, Spark Structured Streaming, event-time windows, watermarks, deduplication, checkpoint recovery, dead-letter handling, replay, and idempotent sinks.
+- DataOps: Airflow, dbt, Terraform, GitHub Actions, data contracts, automated testing, observability, runbooks, backfills, incident response, and controlled promotion.
+- AI and ML enablement: point-in-time feature products, leakage prevention, MLflow, governed scoring outputs, drift checks, feature APIs, and Cortex semantic consumption.
+- Casino analytics: gaming revenue, slot utilization, player value, offer attribution, labor efficiency, and location profitability.
 
 ## Architecture
 
@@ -74,7 +72,7 @@ services/       Governed feature/score API and Cortex client
 terraform/      Repeatable Snowflake environment provisioning
 contracts/      JSON Schema contracts and ownership metadata
 observability/  Data-quality, health, freshness and cost-monitoring SQL
-docs/           Architecture decisions, source-to-target mappings and runbooks
+docs/           Architecture decisions, mappings, operations and setup documentation
 tests/          Contract, unit, integration, reconciliation and business-formula tests
 ```
 
@@ -99,20 +97,22 @@ bash scripts/create_kafka_topics.sh
 make test
 ```
 
-## Production engineering guarantees
+See [Getting started](docs/getting_started.md) for local execution, Snowflake configuration, and deployment procedures.
 
-- Every write is idempotent, transactional, or protected by deterministic keys.
-- Every data product declares its grain, owner, SLA, contract, lineage, quality checks, and recovery procedure.
+## Engineering invariants
+
+- Writes are idempotent, transactional, or protected by deterministic keys.
+- Data products declare grain, owner, SLA, contract, lineage, quality checks, and recovery procedures.
 - Backfills use bounded intervals, isolated checkpoints, reconciliation, and safe merge behavior.
 - Player PII is masked and property-level access is filtered by policy.
 - ML features are point-in-time correct; model outputs carry model version, feature timestamp, score timestamp, and trace metadata.
 - Cortex access is semantic, role-aware, evaluated, and audited rather than exposing unrestricted raw tables.
 - DEV, QA, and PROD use separate configuration and controlled promotion.
 
-## Demonstration path
+## End-to-end data flow
 
-1. Generate synthetic slot events, including duplicates, late events, and intentionally malformed records.
-2. Publish them to Kafka or Pub/Sub.
+1. Generate synthetic slot events, including duplicates, late events, and malformed records.
+2. Publish events to Kafka or Pub/Sub.
 3. Process valid events through Spark Structured Streaming with checkpointing and watermarks.
 4. Route invalid records to a dead-letter path.
 5. Land immutable raw events in Bronze.
@@ -124,18 +124,22 @@ make test
 
 ## Documentation
 
-- [S.T.A.R.T. walkthrough](docs/START_HERE.md)
+- [Getting started](docs/getting_started.md)
+- [Platform components](docs/platform_components.md)
 - [Architecture](docs/architecture.md)
 - [Source-to-target mapping](docs/source_to_target.md)
 - [Production runbook](docs/runbook.md)
 - [Architecture decision records](docs/adr/0001-native-vs-external-orchestration.md)
-- [Interview walkthrough](docs/interview_walkthrough.md)
 - [Security policy](SECURITY.md)
 - [Contribution workflow](CONTRIBUTING.md)
 
 ## Security
 
 Never commit credentials, private keys, account identifiers, production data, or `.env` files. Use key-pair authentication, GitHub Environments, short-lived identity where available, and an approved secret manager. See [SECURITY.md](SECURITY.md).
+
+## Maintainer
+
+Designed and maintained by Kellon Lewis (`@mrdata355`).
 
 ## License
 

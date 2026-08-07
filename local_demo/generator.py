@@ -43,7 +43,7 @@ def generate_slot_events(count: int, seed: int = 355) -> list[SlotEvent]:
             )
         )
 
-    # Inject one duplicate to prove idempotent deduplication behavior.
+    # Include one deterministic duplicate for deduplication validation.
     if count >= 10:
         events.append(events[4])
     return events
