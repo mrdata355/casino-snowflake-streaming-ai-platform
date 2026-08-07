@@ -35,13 +35,13 @@ class ExecuteResult(BaseModel):
     task_id: str
     language: Language
     state: str
-    columns: list[str] = []
-    rows: list[list[object]] = []
+    columns: list[str] = Field(default_factory=list)
+    rows: list[list[object]] = Field(default_factory=list)
     message: str = ""
     statement_id: str | None = None
     elapsed_ms: int | None = None
     validated: bool = False
-    validation: dict[str, object] = {}
+    validation: dict[str, object] = Field(default_factory=dict)
 
 
 class Capability(BaseModel):
