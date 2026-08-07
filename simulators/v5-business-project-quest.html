@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OpsReady V5 | Business Project Quest</title>
+  <link rel="stylesheet" href="/simulators/v5-business-project-quest.css" />
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <div class="eyebrow">OPSREADY V5 • BUSINESS + PROJECT MASTERY</div>
+    <h1>Business Project Quest</h1>
+    <p>Solve the business problem, choose the architecture, build the production path, prove correctness, and defend the outcome.</p>
+  </div>
+  <div class="master"><span>Quest mastery</span><strong id="questScore">0%</strong><small id="questSub">No graded work yet</small></div>
+</header>
+<nav class="tabs" id="tabs">
+  <button class="active" data-tab="missions">Business Missions</button>
+  <button data-tab="portfolio">Portfolio Projects</button>
+  <button data-tab="ml">ML Projects</button>
+  <button data-tab="scoring">Model Scoring</button>
+  <button data-tab="repo">Repo Capability Map</button>
+  <button data-tab="dashboard">Quest Dashboard</button>
+</nav>
+<main>
+  <section id="missions" class="tab active">
+    <div class="section-head"><div><div class="eyebrow">MISSION MODE</div><h2>Business Missions</h2><p>Original role-based missions modeled around a production workflow: brief → reason → build → validate → business debrief.</p></div><span class="badge">12 missions</span></div>
+    <div class="workspace"><aside class="panel"><div id="missionList" class="scenario-list"></div></aside><article class="panel"><div id="missionWorkspace"></div></article></div>
+  </section>
+
+  <section id="portfolio" class="tab">
+    <div class="section-head"><div><div class="eyebrow">PORTFOLIO MODE</div><h2>Casino Repo Projects</h2><p>Projects map directly to the production-style assets already present in the repository.</p></div><span class="badge">10 projects</span></div>
+    <div id="portfolioGrid" class="project-grid"></div>
+  </section>
+
+  <section id="ml" class="tab">
+    <div class="section-head"><div><div class="eyebrow">ML ENGINEERING</div><h2>Machine Learning Projects</h2><p>Train the full ML product lifecycle: business objective, point-in-time features, model choice, evaluation, scoring, drift and operating limits.</p></div><span class="badge">10 projects</span></div>
+    <div class="workspace"><aside class="panel"><div id="mlList" class="scenario-list"></div></aside><article class="panel"><div id="mlWorkspace"></div></article></div>
+  </section>
+
+  <section id="scoring" class="tab">
+    <div class="section-head"><div><div class="eyebrow">MODEL SERVING</div><h2>Model Scoring & Decisioning Lab</h2><p>Choose online vs batch scoring, define contracts, thresholds, provenance, fallbacks, SLOs and acceptance evidence.</p></div><span class="badge">10 scoring drills</span></div>
+    <div class="workspace"><aside class="panel"><div id="scoreList" class="scenario-list"></div></aside><article class="panel"><div id="scoreWorkspace"></div></article></div>
+  </section>
+
+  <section id="repo" class="tab">
+    <div class="section-head"><div><div class="eyebrow">REPOSITORY MAP</div><h2>Production Capability Map</h2><p>Every major folder visible in the repo is connected to a production responsibility and one or more quest projects.</p></div><span class="badge">Repo-grounded</span></div>
+    <div id="repoGrid" class="repo-grid"></div>
+  </section>
+
+  <section id="dashboard" class="tab">
+    <div class="section-head"><div><div class="eyebrow">EVIDENCE</div><h2>Quest Dashboard</h2><p>Best scores, project completion, ML readiness and recent business-project evidence.</p></div><button id="resetQuest" class="danger">Reset V5 Progress</button></div>
+    <div id="summaryGrid" class="summary-grid"></div>
+    <article class="panel"><h3>Recent evidence</h3><div class="table-wrap"><table><thead><tr><th>Area</th><th>Item</th><th>Score</th><th>Evidence</th><th>When</th></tr></thead><tbody id="historyRows"></tbody></table></div></article>
+  </section>
+</main>
+<script src="/simulators/v5-business-project-quest.js"></script>
+</body>
+</html>
