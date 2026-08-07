@@ -1,19 +1,49 @@
-# OpsReady Advanced Mastery V3
+# OpsReady Advanced Mastery V5
 
-The Production Control Room now includes seven additional graded workbenches beyond the live incident simulator and 30-defect repair bay.
+OpsReady now combines five complementary layers instead of replacing prior work:
 
-## Advanced workbenches
+1. Production Control Room and incident recovery.
+2. 30-defect broken-pipeline repair bay.
+3. Advanced SQL, PySpark, Python testing, dbt, API, CI/CD and triage labs.
+4. V4 architecture reasoning, Jinja mastery and AgentOps.
+5. V5 Business Project Quest for business missions, portfolio projects, ML projects and model scoring.
 
-- **SQL Patterns — 14 scenarios**: anti-joins, deterministic dedupe, Top-N, running totals, rolling windows, month-over-month growth, FULL OUTER reconciliation, SCD2 as-of joins, Snowflake FLATTEN, idempotent MERGE, incremental watermarks, pruning-safe filters, gaps-and-islands/sessionization, and conditional control totals.
-- **PySpark Transformations — 12 scenarios**: explicit schemas, nested explode, deterministic Window dedupe, streaming watermark/dedupe, distributed aggregations, left-anti joins, conditional quality classification, safe broadcast, repartition/AQE reasoning, foreachBatch MERGE, rolling windows, and corrupt-JSON quarantine.
-- **Python Unit Testing — 8 scenarios**: pytest parameterization, DataFrame equality, HTTP timeout mocking, 429 retry behavior, idempotency regression, breaking-schema validation, control-total invariants, and scoring API contract tests.
-- **dbt Development — 8 scenarios**: staging contracts, incremental models with lookback, generic tests, source freshness, singular reconciliation tests, safe-divide macros, SCD2 snapshots, and semantic metric governance.
-- **API + Scoring — 8 scenarios**: FastAPI/Pydantic contracts, scoring provenance, bounded retries/timeouts, cursor pagination, idempotent mutations, batch scoring, least-privilege analytics, and SLO instrumentation.
-- **Development & CI/CD — 8 scenarios**: pre-merge gates, secret handling, canaries, rollback/data-acceptance separation, feature flags, bounded migrations/backfills, post-deploy observability, and production Definition of Done.
-- **Incident Triage — 8 scenarios**: reward duplication, credential exposure, Kafka skew, scoring latency, dbt documentation failures, ML drift/capacity, worker recovery, and post-deploy reconciliation failures.
+## V5 Business Project Quest
 
-## Scoring model
+### Business Missions — 12
+Each mission follows a production progression: business brief → architecture decision → why/why-not reasoning → build plan/code patterns → validation evidence → business debrief.
 
-Each code lab evaluates required production patterns and explicitly penalizes known anti-patterns when applicable. Best scores persist locally by scenario. The Control Room emits lab evidence into OpsReady so Manager View can display recorded attempts and scores.
+Mission domains include loyalty freshness, Snowflake FinOps, governed revenue, slot streaming, point-in-time ML features, low-latency serving, bounded backfills, DEV/QA/PROD promotion, schema drift, profitability marts, fraud-review capacity and governed conversational analytics.
 
-The advanced labs are intentionally **simulated execution environments**, not arbitrary code execution sandboxes. They train code shape, production reasoning, safety, failure modes, and acceptance criteria while remaining safe for a static Vercel demo.
+### Casino Repo Portfolio Projects — 10
+The quest maps directly to existing repository assets:
+
+- End-to-End Casino Data Product — `airflow/ + dbt/ + snowflake/`
+- Real-Time Slot Streaming Pipeline — `spark/jobs/slot_stream.py + ingestion/`
+- Snowflake Native CDC Platform — `snowflake/ddl + snowflake/ops`
+- Governed Profitability Mart — `dbt/models/gold`
+- Player Feature Platform — `dbt/models/features`
+- MLflow Player Value Training — `ml/training/train_player_value.py`
+- Model Drift Monitoring — `ml/monitoring/drift.py`
+- Feature & Score API — `services/feature_api`
+- Production Validation Suite — `tests/ + dbt/tests + snowflake/tests`
+- Infrastructure & Release Platform — `terraform/ + .github/ + docker-compose.yml`
+
+### ML Projects — 10
+Projects cover player value regression, churn classification, next-best-offer ranking, digital fraud, slot anomaly detection, labor/footfall forecasting, bounded dynamic pricing, profitability forecasting, redemption propensity and model monitoring.
+
+Each ML project grades model choice, point-in-time feature design, technical/business evaluation, leakage/drift/operating risk, and scoring/deployment provenance.
+
+### Model Scoring & Decisioning — 10
+Drills cover batch vs online scoring, provenance contracts, capacity-based thresholds, freshness protection, canary promotion, retry-safe idempotency, drift with delayed labels, training-serving feature parity and score-API SLO triage.
+
+### Repository Capability Map
+The V5 repo map connects the major folders visible in the repository to production responsibilities and quest projects: `.github`, Airflow, contracts, dbt, docs, ingestion, local demo, ML, observability, OpsReady, scripts, services, simulators, Snowflake, Spark, Terraform and tests.
+
+## Scoring philosophy
+
+OpsReady V5 is designed around the question: **Can the engineer solve the business problem and prove the result, not merely recognize syntax?**
+
+Business missions score architecture choice, reasoning, implementation, validation and business debrief separately. ML and model-scoring projects also require operating constraints, provenance and acceptance evidence. Scores persist locally and emit evidence into the existing OpsReady manager dashboard.
+
+The static Vercel experience remains a simulated execution environment. A future enterprise edition can swap selected modules for isolated real SQL/Python/Spark/cloud sandboxes while preserving the same mission and evidence model.
