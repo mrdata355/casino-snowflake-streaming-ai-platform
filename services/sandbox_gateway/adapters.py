@@ -116,31 +116,28 @@ class DatabricksAdapter:
 
     @property
     def available(self) -> bool:
-        return bool(self.host and self.token and self.warehouse_id)
+        return bool(self.host and self.token and self.warehouse_id and self.catalog)
 
     @property
     def python_available(self) -> bool:
-        return bool(self.host and self.token and self.cluster_id)
+        return bool(self.host and self.token and self.cluster_id and self.catalog)
 
     @property
     def headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"}
 
-    def _sql(self, statement: str, schema: str, wait_seconds: int = 10) -> AdapterResponse:
-        payload = {
+    def _sql(self, statement: str, schema: str | None = None, wait_seconds: int = 10) -> AdapterResponse:
+        payload: dict[str, Any] = {
             "warehouse_id": self.warehouse_id,
             "catalog": self.catalog,
-            "schema": schema,
             "statement": statement,
             "format": "JSON_ARRAY",
             "disposition": "INLINE",
             "wait_timeout": f"{wait_seconds}s",
             "on_wait_timeout": "CONTINUE",
-            "query_tags": [
-                {"key": "application", "value": "opsready"},
-                {"key": "environment", "value": "training"},
-            ],
         }
+        if schema:
+            payload["schema"] = schema
         started = time.perf_counter()
         with httpx.Client(timeout=35) as client:
             response = client.post(f"{self.host}/api/2.0/sql/statements", headers=self.headers, json=payload)
@@ -162,11 +159,12 @@ class DatabricksAdapter:
         cols = [c.get("name", "") for c in manifest.get("schema", {}).get("columns", [])]
         rows = data.get("result", {}).get("data_array", []) or []
         elapsed = int((time.perf_counter() - started) * 1000)
+        location = f"{self.catalog}.{schema}" if schema else self.catalog
         return AdapterResponse(
             state=state,
             columns=cols,
             rows=rows[:200],
-            message=f"Databricks SQL statement succeeded in {self.catalog}.{schema}.",
+            message=f"Databricks SQL statement succeeded in {location}.",
             statement_id=statement_id,
             elapsed_ms=elapsed,
         )
@@ -174,7 +172,7 @@ class DatabricksAdapter:
     def create_session(self, schema: str, admin_lab: bool) -> str:
         if admin_lab and not self.allow_admin:
             raise SandboxPolicyError("Databricks admin labs are disabled on this gateway.")
-        self._sql(f"CREATE SCHEMA IF NOT EXISTS {self.catalog}.{schema}", "default")
+        self._sql(f"CREATE SCHEMA IF NOT EXISTS {self.catalog}.{schema}")
         return f"{self.catalog}.{schema}"
 
     def execute_sql(self, schema: str, code: str, *, admin_lab: bool) -> AdapterResponse:
@@ -251,7 +249,7 @@ class DatabricksAdapter:
         )
 
     def cleanup(self, schema: str) -> None:
-        self._sql(f"DROP SCHEMA IF EXISTS {self.catalog}.{schema} CASCADE", "default")
+        self._sql(f"DROP SCHEMA IF EXISTS {self.catalog}.{schema} CASCADE")
 
 
 class SqlServerAdapter:
