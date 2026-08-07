@@ -11,6 +11,8 @@
     {"src": "simulators/production-control-room.css", "use": "@vercel/static"},
     {"src": "simulators/production-control-room.js", "use": "@vercel/static"},
     {"src": "simulators/defects30-ui.js", "use": "@vercel/static"},
+    {"src": "simulators/advanced-labs.css", "use": "@vercel/static"},
+    {"src": "simulators/advanced-labs.js", "use": "@vercel/static"},
     {"src": "simulators/neon-harbor-production.html", "use": "@vercel/static"},
     {"src": "simulators/broken-pipeline-30.html", "use": "@vercel/static"},
     {"src": "simulators/daily-operations.html", "use": "@vercel/static"}
