@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OpsReady V4 | Architecture, Jinja & AgentOps</title>
+<link rel="stylesheet" href="/simulators/v4-reasoning-agentops.css" />
+</head>
+<body>
+<header class="topbar">
+  <div><div class="eyebrow">OPSREADY V4</div><h1>Architecture Reasoning + Jinja + AgentOps</h1><p>Do the work. Explain why. Compare alternatives. Defend the tradeoff. Prove correctness.</p></div>
+  <div class="master"><span>V4 Mastery</span><strong id="masterScore">0%</strong><small id="masterSub">No graded evidence yet</small></div>
+</header>
+<nav id="tabs" class="tabs">
+  <button class="active" data-tab="architecture">Architecture Decisions</button>
+  <button data-tab="jinja">Jinja Mastery</button>
+  <button data-tab="agentops">9-Agent Swarm</button>
+  <button data-tab="agentdrills">Agent Decision Drills</button>
+  <button data-tab="library">127-Agent Library</button>
+  <button data-tab="scorecard">Scorecard</button>
+</nav>
+<main>
+<section id="architecture" class="tab active">
+  <div class="section-head"><div><div class="eyebrow">STAFF / PRINCIPAL JUDGMENT</div><h2>Architecture Decision Lab</h2><p>Correct syntax is only part of the score. Defend why the selected tool or pattern is better than the alternatives for this workload.</p></div><span class="badge">24 scenarios</span></div>
+  <div class="workspace">
+    <aside><div id="archList" class="scenario-list"></div></aside>
+    <article class="panel">
+      <div id="archMeta" class="meta"></div><h3 id="archTitle"></h3><p id="archPrompt" class="prompt"></p>
+      <label>Choose the primary approach<select id="archChoice"></select></label>
+      <label>Why is this the best fit?<textarea id="archWhy" placeholder="Workload characteristics, semantics, scale, latency, governance..."></textarea></label>
+      <label>Why not the strongest alternative?<textarea id="archWhyNot" placeholder="Name the alternative and explain where it loses here."></textarea></label>
+      <label>Tradeoff / failure mode<textarea id="archTradeoff" placeholder="What do you pay for this choice and when would you change it?"></textarea></label>
+      <label>How do you prove the decision is correct?<textarea id="archProof" placeholder="Metrics, tests, reconciliation, query profile, SLA, cost..."></textarea></label>
+      <div class="actions"><button id="gradeArch" class="primary">Grade Decision</button><button id="loadArchRef">Show Reference</button></div>
+      <div id="archFeedback" class="feedback">Select a scenario and defend the architecture.</div>
+    </article>
+  </div>
+</section>
+<section id="jinja" class="tab">
+  <div class="section-head"><div><div class="eyebrow">DBT + JINJA</div><h2>Jinja Mastery Workbench</h2><p>Write real dbt/Jinja patterns: refs, sources, macros, variables, loops, environment controls and incremental logic.</p></div><span class="badge">15 coding labs</span></div>
+  <div class="workspace">
+    <aside><div id="jinjaList" class="scenario-list"></div></aside>
+    <article class="panel"><div id="jinjaMeta" class="meta"></div><h3 id="jinjaTitle"></h3><p id="jinjaPrompt" class="prompt"></p>
+      <textarea id="jinjaCode" class="code"></textarea>
+      <label>Explain why this Jinja pattern belongs here<textarea id="jinjaWhy" placeholder="What problem does templating solve, and what should remain plain SQL?"></textarea></label>
+      <div class="actions"><button id="gradeJinja" class="primary">Compile / Grade</button><button id="loadJinjaRef">Load Reference</button></div>
+      <pre id="jinjaOutput" class="output">Ready.</pre><div id="jinjaRubric" class="rubric"></div>
+    </article>
+  </div>
+</section>
+<section id="agentops" class="tab">
+  <div class="section-head"><div><div class="eyebrow">BOUNDED AGENTIC OPERATIONS</div><h2>9-Agent + 6-Model Swarm</h2><p>Inspect each agent's trigger, tools, outputs, authority boundary, approval gates and ML dependencies.</p></div><span class="badge">15 systems</span></div>
+  <div class="swarm-layout"><div id="agentCards" class="card-grid"></div><article id="agentDetail" class="panel sticky"></article></div>
+  <h3 class="subhead">Machine-learning systems</h3><div id="modelCards" class="card-grid"></div>
+</section>
+<section id="agentdrills" class="tab">
+  <div class="section-head"><div><div class="eyebrow">AGENT SELECTION + GOVERNANCE</div><h2>Agent Decision Drills</h2><p>Select the right agent, the safe action, and explain why automation should or should not proceed.</p></div><span class="badge">12 incidents</span></div>
+  <div class="workspace"><aside><div id="agentDrillList" class="scenario-list"></div></aside><article class="panel"><div id="drillMeta" class="meta"></div><h3 id="drillTitle"></h3><p id="drillPrompt" class="prompt"></p>
+    <label>Primary agent<select id="drillAgent"></select></label><label>Next action<select id="drillAction"></select></label><label>Reasoning / authority boundary<textarea id="drillWhy" placeholder="Why this agent? What can it do autonomously? What requires approval?"></textarea></label>
+    <div class="actions"><button id="gradeAgentDrill" class="primary">Grade Agent Decision</button><button id="showDrillRef">Show Reference</button></div><div id="drillFeedback" class="feedback"></div>
+  </article></div>
+</section>
+<section id="library" class="tab">
+  <div class="section-head"><div><div class="eyebrow">REFERENCE ARCHITECTURES</div><h2>127-Agent Architecture Library</h2><p>Searchable specialized agent-role patterns. 75 are marked hands-on proficiency patterns and 52 broader exposure patterns; this is a design library, not a claim that 127 separate autonomous systems are deployed.</p></div><span class="badge">127 patterns</span></div>
+  <div class="filters"><input id="agentSearch" placeholder="Search domain, role, tool, evidence..."/><select id="agentLevel"><option value="all">All levels</option><option>Proficiency</option><option>Exposure</option></select><select id="agentDomain"><option value="all">All domains</option></select></div>
+  <div id="libraryStats" class="stats"></div><div id="agentLibrary" class="library-grid"></div>
+</section>
+<section id="scorecard" class="tab">
+  <div class="section-head"><div><div class="eyebrow">EVIDENCE</div><h2>V4 Reasoning Scorecard</h2><p>Best scores persist in this browser and are emitted to the parent OpsReady manager-evidence system.</p></div></div>
+  <div id="scoreMetrics" class="score-grid"></div><article class="panel"><h3>Recent V4 attempts</h3><div class="table-wrap"><table><thead><tr><th>Lab</th><th>Scenario</th><th>Score</th><th>Evidence</th><th>Time</th></tr></thead><tbody id="historyBody"></tbody></table></div></article>
+</section>
+</main>
+<script src="/simulators/v4-reasoning-agentops.js"></script>
+</body></html>
